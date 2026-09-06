@@ -1,0 +1,181 @@
+:root {
+  --header: 108px;
+  --navy: #0C2840;
+  --cream: #e8eaed;
+  --paper: #f3f4f6;
+  --white: #f7f8fa;
+  --sand: #c5c9ce;
+  --clay: #3a4149;
+  --clay-deep: #2c3238;
+}
+
+.site-header {
+  background: #0C2840;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.final-cta {
+  background:
+    linear-gradient(180deg, rgba(14,34,56,0.55), rgba(14,34,56,0.78)),
+    url("../images/image2.jpg") center/cover;
+}
+
+.brand img {
+  height: 92px;
+  width: auto;
+  display: block;
+}
+
+.nav a { color: #f7f8fa; }
+.nav a:hover, .nav a.active { color: #c5c9ce; }
+.nav .cta {
+  background: #f7f8fa;
+  color: #0C2840 !important;
+}
+.menu-btn {
+  color: #f7f8fa;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+img { height: auto; }
+body { overflow-x: hidden; }
+input, select, textarea { font-size: 16px; }
+.site-header .header-inner { position: relative; }
+
+.menu-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+@media (max-width: 960px) {
+  :root { --header: 88px; }
+  .wrap,
+  .header-inner,
+  .hero-copy {
+    width: min(var(--max), calc(100% - 32px));
+  }
+  section { padding: 64px 0; }
+  .page-hero { padding: 48px 0 28px; }
+  .brand img { height: 72px; }
+  .hook-grid,
+  .price-grid,
+  .shop-teaser,
+  .split,
+  .footer-grid,
+  .shop-grid,
+  .two-col {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .products-grid,
+  .quotes { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .masonry {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+  }
+  .masonry img { height: 240px; }
+  .masonry .wide {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    height: 300px;
+  }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    background: var(--paper);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 20px 20px;
+    border-bottom: 1px solid var(--line);
+    gap: 4px;
+    box-shadow: 0 16px 30px rgba(14, 34, 56, 0.08);
+  }
+  .nav a {
+    padding: 12px 8px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    color: #0C2840;
+  }
+  .nav a:hover, .nav a.active { color: #3a4149; }
+  .nav .cta {
+    margin-top: 8px;
+    justify-content: center;
+    width: 100%;
+    background: #0C2840;
+    color: #f7f8fa !important;
+  }
+  .nav.open { display: flex; }
+  .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .hook img,
+  .split img { height: 340px; }
+  .shop-teaser img { height: auto; object-fit: contain; }
+  .form-row { grid-template-columns: 1fr; }
+  .hero { min-height: min(78vh, 720px); }
+  .hero-copy { margin-bottom: 48px; }
+  .price-card { padding: 26px; }
+}
+
+@media (max-width: 680px) {
+  :root { --header: 76px; }
+  body { font-size: 16.5px; }
+  .wrap,
+  .header-inner,
+  .hero-copy {
+    width: min(var(--max), calc(100% - 24px));
+  }
+  .brand img { height: 58px; }
+  section { padding: 48px 0; }
+  .page-hero { padding: 36px 0 20px; }
+  .hero { min-height: 100svh; }
+  .hero-copy {
+    margin: 0 auto 36px;
+    padding-top: 88px;
+  }
+  .hero h1 { font-size: clamp(1.85rem, 8.4vw, 2.6rem); }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .actions .btn,
+  .card-body .btn { width: 100%; }
+  .handmade-bar {
+    gap: 8px 16px;
+    padding: 12px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+  .hook img,
+  .split img { height: 240px; }
+  .shop-teaser img { height: auto; object-fit: contain; }
+  .card img,
+  .shop-card img { height: 220px; }
+  .steps { grid-template-columns: 1fr; }
+  .masonry { grid-template-columns: 1fr; }
+  .masonry img,
+  .masonry .wide { height: 220px; }
+  .amount { font-size: 2.4rem; }
+  form { padding: 18px; }
+}
+
+@media (max-width: 400px) {
+  .hero-copy { padding-top: 72px; }
+  .brand img { height: 50px; }
+}
+
+@supports (padding: max(0px)) {
+  .site-header { padding-top: env(safe-area-inset-top); }
+  .site-footer { padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+}
