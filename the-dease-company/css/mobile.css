@@ -1,5 +1,6 @@
 :root {
   --header: 108px;
+  --navy: #0C2840;
   --cream: #e8eaed;
   --paper: #f3f4f6;
   --white: #f7f8fa;
@@ -9,13 +10,25 @@
 }
 
 .site-header {
-  background: rgba(243, 244, 246, 0.94);
+  background: #0C2840;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .brand img {
   height: 92px;
   width: auto;
-  mix-blend-mode: multiply;
+  filter: brightness(0) invert(1);
+}
+
+.nav a { color: #f7f8fa; }
+.nav a:hover, .nav a.active { color: #c5c9ce; }
+.nav .cta {
+  background: #f7f8fa;
+  color: #0C2840 !important;
+}
+.menu-btn {
+  color: #f7f8fa;
+  border-color: rgba(255, 255, 255, 0.28);
 }
 
 img { height: auto; }
@@ -87,11 +100,15 @@ input, select, textarea { font-size: 16px; }
     min-height: 44px;
     display: flex;
     align-items: center;
+    color: #0C2840;
   }
+  .nav a:hover, .nav a.active { color: #3a4149; }
   .nav .cta {
     margin-top: 8px;
     justify-content: center;
     width: 100%;
+    background: #0C2840;
+    color: #f7f8fa !important;
   }
   .nav.open { display: flex; }
   .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
