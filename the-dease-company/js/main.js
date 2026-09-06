@@ -1,3 +1,11 @@
+(function loadMobileStyles() {
+  if (document.querySelector('link[href="css/mobile.css"]')) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "css/mobile.css";
+  document.head.appendChild(link);
+})();
+
 const btn = document.querySelector(".menu-btn");
 const nav = document.querySelector(".nav");
 
