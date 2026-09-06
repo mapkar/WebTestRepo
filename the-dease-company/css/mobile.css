@@ -1,4 +1,16 @@
-:root { --header: 108px; }
+:root {
+  --header: 108px;
+  --cream: #e8eaed;
+  --paper: #f3f4f6;
+  --white: #f7f8fa;
+  --sand: #c5c9ce;
+  --clay: #3a4149;
+  --clay-deep: #2c3238;
+}
+
+.site-header {
+  background: rgba(243, 244, 246, 0.94);
+}
 
 .brand img {
   height: 92px;
