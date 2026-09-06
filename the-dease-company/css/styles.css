@@ -129,7 +129,7 @@ input, select, textarea { font-size: 16px; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(14,34,56,0.18) 0%, rgba(14,34,56,0.55) 55%, rgba(14,34,56,0.82) 100%);
+    linear-gradient(180deg, rgba(12,40,64,0.28) 0%, rgba(12,40,64,0.42) 42%, rgba(12,40,64,0.78) 100%);
 }
 .hero-copy {
   position: relative;
@@ -138,6 +138,13 @@ input, select, textarea { font-size: 16px; }
   margin: 0 auto 72px;
   color: var(--white);
   max-width: 780px;
+  background: rgba(12, 40, 64, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 34px 38px 36px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 252, 248, 0.14);
+  box-shadow: 0 22px 50px rgba(8, 18, 32, 0.38);
 }
 .eyebrow {
   display: inline-block;
@@ -305,17 +312,34 @@ h3 {
   margin-top: 40px;
 }
 .step {
-  padding: 24px 22px 28px;
+  position: relative;
+  overflow: hidden;
+  padding: 28px 22px 28px 26px;
   background: var(--white);
   border-radius: var(--radius);
   border: 1px solid var(--line);
+  min-height: 220px;
 }
 .step-num {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-54%);
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 2.4rem;
-  color: var(--clay);
-  line-height: 1;
-  margin-bottom: 10px;
+  font-size: 10rem;
+  font-weight: 600;
+  color: var(--navy);
+  opacity: 0.1;
+  line-height: 0.75;
+  margin: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.step h3,
+.step p {
+  position: relative;
+  z-index: 1;
 }
 
 /* Pricing */
@@ -492,12 +516,6 @@ textarea { min-height: 140px; resize: vertical; }
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
-.shop-grid img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  border-radius: var(--radius);
-}
 .shop-card img { height: auto; width: 100%; object-fit: contain; }
 .price-tag {
   font-family: "Cormorant Garamond", Georgia, serif;
@@ -591,7 +609,10 @@ textarea { min-height: 140px; resize: vertical; }
   .hero {
     min-height: min(78vh, 720px);
   }
-  .hero-copy { margin-bottom: 48px; }
+  .hero-copy {
+    margin-bottom: 48px;
+    padding: 28px 24px 26px;
+  }
   .actions { gap: 10px; }
   .price-card { padding: 26px; }
 }
@@ -613,8 +634,10 @@ textarea { min-height: 140px; resize: vertical; }
   }
   .hero-copy {
     margin: 0 auto 36px;
-    padding-top: 88px;
+    padding: 88px 20px 24px;
   }
+  .step { min-height: 0; }
+  .step-num { font-size: 8.2rem; opacity: 0.11; }
   .hero h1 {
     font-size: clamp(1.85rem, 8.4vw, 2.6rem);
   }
@@ -672,7 +695,7 @@ textarea { min-height: 140px; resize: vertical; }
 
 /* Small phones */
 @media (max-width: 400px) {
-  .hero-copy { padding-top: 72px; }
+  .hero-copy { padding: 72px 16px 20px; }
   .brand img { height: 50px; }
   .btn { padding: 12px 16px; }
 }
