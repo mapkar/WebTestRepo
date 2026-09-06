@@ -14,10 +14,16 @@
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
+.final-cta {
+  background:
+    linear-gradient(180deg, rgba(14,34,56,0.55), rgba(14,34,56,0.78)),
+    url("../images/image2.jpg") center/cover;
+}
+
 .brand img {
   height: 92px;
   width: auto;
-  filter: brightness(0) invert(1);
+  display: block;
 }
 
 .nav a { color: #f7f8fa; }
