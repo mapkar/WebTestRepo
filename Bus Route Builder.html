@@ -371,8 +371,26 @@
         border-bottom: 1px solid var(--line);
         background: var(--surface);
       }
+      .stop-row {
+        transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
       .stop-row.dragging { opacity: 0.42; }
       .stop-row.drag-over { box-shadow: inset 0 3px 0 var(--accent); }
+      .stop-row.just-moved {
+        position: relative;
+        z-index: 2;
+        animation: stop-land 680ms ease;
+      }
+      @keyframes stop-land {
+        0% {
+          background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+          box-shadow: 0 10px 22px rgba(34, 48, 54, 0.12);
+        }
+        100% {
+          background: var(--surface);
+          box-shadow: 0 0 0 rgba(34, 48, 54, 0);
+        }
+      }
       .drag-handle {
         width: 30px;
         min-height: 44px;
@@ -409,6 +427,10 @@
         background: transparent;
         color: var(--muted);
         border-color: var(--line);
+        transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+      }
+      .stop-controls button:active:not(:disabled) {
+        transform: translateY(1px) scale(0.96);
       }
       .stop-controls button:hover { color: var(--ink); background: var(--surface-2); }
       .stop-controls .remove:hover { color: var(--danger); }
@@ -444,6 +466,11 @@
         color: var(--warning-ink);
         font-size: 0.86rem;
         font-weight: 650;
+      }
+      .maps-limit {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 0.84rem;
       }
 
       .confirm-dialog {
@@ -657,7 +684,11 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+          animation: none !important;
+        }
       }
 
       @media print {
@@ -692,7 +723,7 @@
         <ol class="steps">
           <li class="step"><span class="step-number">1</span><strong>Paste stops</strong><span>Use one address per line or paste an address-column CSV.</span></li>
           <li class="step"><span class="step-number">2</span><strong>Put them in order</strong><span>Drag stops or use the Up and Down buttons.</span></li>
-          <li class="step"><span class="step-number">3</span><strong>Open the route</strong><span>Send the full run straight to Google Maps.</span></li>
+          <li class="step"><span class="step-number">3</span><strong>Open the route</strong><span>Send it to Google Maps. One link holds 10 stops, including start and end.</span></li>
         </ol>
         <div class="onboarding-actions">
           <button id="dismissOnboarding" class="button-primary" type="button">Build a route</button>
@@ -743,7 +774,7 @@
           <div class="field">
             <label for="stopInput">Stops</label>
             <textarea id="stopInput" placeholder="104 Pine St, Seneca, SC&#10;220 Northwoods Dr, Seneca, SC&#10;…" spellcheck="false"></textarea>
-            <span class="hint">One per line works best. CSV headers such as “address, city, state, zip” are recognized.</span>
+            <span class="hint">One per line works best. CSV headers such as “address, city, state, zip” are recognized. Google Maps exports are limited to 10 stops, including start and end.</span>
           </div>
 
           <div class="button-row">
@@ -790,6 +821,7 @@
               <button id="copyButton" class="button-secondary" type="button" disabled>Copy Maps URL</button>
             </div>
             <p class="route-stats"><strong id="statsStops">0 stops</strong><span id="urlStatus"></span></p>
+            <p id="mapsLimit" class="maps-limit">Google Maps exports are limited to 10 stops, including start and end.</p>
             <p id="urlWarning" class="url-warning" hidden></p>
           </div>
         </section>
@@ -797,14 +829,14 @@
 
       <section id="savedSection" class="card saved-section" aria-labelledby="savedTitle" hidden>
         <div class="section-heading">
-          <h2 id="savedTitle">Saved this session</h2>
+          <h2 id="savedTitle">Saved on this browser</h2>
           <span id="savedCount" class="count"></span>
         </div>
-        <p class="saved-note">These disappear when this page closes or reloads. Export any route you want to keep.</p>
+        <p class="saved-note">Kept in this browser, on top of the route you’re editing, so a reload doesn’t drop them. Export JSON for a copy you can move to another device.</p>
         <div id="savedList" class="saved-list"></div>
       </section>
 
-      <footer class="product-footer">SubRoute v1.0 — made for drivers.</footer>
+      <footer class="product-footer">SubRoute v1.1 — made for drivers.</footer>
     </main>
 
     <section id="runSheet" class="run-sheet" aria-labelledby="runSheetTitle">
@@ -829,7 +861,7 @@
     <dialog id="clearDialog" class="confirm-dialog" aria-labelledby="clearTitle">
       <div class="confirm-inner">
         <h2 id="clearTitle">Clear this route?</h2>
-        <p>This removes the current stop list and route details. Export it first if you need a copy.</p>
+        <p>This removes the current stop list and route details. Routes already saved on this browser stay put.</p>
         <div class="confirm-actions">
           <button id="cancelClear" class="button-secondary" type="button">Keep route</button>
           <button id="confirmClear" class="clear-confirm" type="button">Clear route</button>
@@ -853,6 +885,13 @@
           stops: []
         };
         var sessionRoutes = [];
+        var MAPS_STOP_LIMIT = 10;
+        var SAVED_KEY = "subroute.saved.v1";
+        var DRAFT_KEY = "subroute.draft.v1";
+        var SEEN_KEY = "subroute.onboarding.v1";
+        var SAVED_CAP = 40;
+        var storageNoticeShown = false;
+        var pendingMotion = null;
 
         var els = {
           routeName: document.getElementById("routeName"),
@@ -873,6 +912,7 @@
           copyButton: document.getElementById("copyButton"),
           urlStatus: document.getElementById("urlStatus"),
           urlWarning: document.getElementById("urlWarning"),
+          mapsLimit: document.getElementById("mapsLimit"),
           saveButton: document.getElementById("saveButton"),
           exportButton: document.getElementById("exportButton"),
           clearButton: document.getElementById("clearButton"),
@@ -923,6 +963,145 @@
           var month = String(now.getMonth() + 1).padStart(2, "0");
           var day = String(now.getDate()).padStart(2, "0");
           return now.getFullYear() + "-" + month + "-" + day;
+        }
+
+        function prefersReducedMotion() {
+          return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        }
+
+        function readJson(key, fallback) {
+          try {
+            var raw = window.localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (error) {
+            return fallback;
+          }
+        }
+
+        function writeJson(key, value) {
+          try {
+            window.localStorage.setItem(key, JSON.stringify(value));
+            return true;
+          } catch (error) {
+            if (!storageNoticeShown) {
+              storageNoticeShown = true;
+              showToast("Browser storage is off. This visit still keeps routes in memory.");
+            }
+            return false;
+          }
+        }
+
+        function persistSaved() {
+          var compact = sessionRoutes.slice(0, SAVED_CAP).map(function (route) {
+            return {
+              sessionId: route.sessionId,
+              name: route.name || "",
+              start: route.start || "",
+              end: route.end || "",
+              stops: (route.stops || []).slice(0, 300),
+              savedAt: route.savedAt || ""
+            };
+          });
+          return writeJson(SAVED_KEY, compact);
+        }
+
+        function persistDraft() {
+          syncFields();
+          var draft = {
+            name: state.name,
+            start: state.start,
+            end: state.end,
+            stops: state.stops.map(function (stop) { return stop.label; }).slice(0, 300),
+            stopInput: String(els.stopInput.value || "").slice(0, 120000)
+          };
+          var empty = !draft.name && !draft.start && !draft.end && !draft.stops.length && !cleanText(draft.stopInput);
+          if (empty) {
+            try { window.localStorage.removeItem(DRAFT_KEY); } catch (error) {}
+            return;
+          }
+          writeJson(DRAFT_KEY, draft);
+        }
+
+        function loadSavedFromCache() {
+          var stored = readJson(SAVED_KEY, []);
+          if (!Array.isArray(stored)) return;
+          sessionRoutes = stored.filter(function (route) {
+            return route && Array.isArray(route.stops);
+          }).slice(0, SAVED_CAP).map(function (route) {
+            return {
+              sessionId: String(route.sessionId || ("route-" + Date.now().toString(36))),
+              name: cleanText(route.name).slice(0, 90),
+              start: cleanText(route.start),
+              end: cleanText(route.end),
+              stops: route.stops.map(function (stop) {
+                return cleanText(typeof stop === "string" ? stop : "");
+              }).filter(Boolean).slice(0, 300),
+              savedAt: typeof route.savedAt === "string" ? route.savedAt : ""
+            };
+          });
+        }
+
+        function restoreDraft() {
+          var draft = readJson(DRAFT_KEY, null);
+          if (!draft || typeof draft !== "object") return false;
+          var stops = Array.isArray(draft.stops) ? draft.stops.map(function (stop) {
+            return cleanText(typeof stop === "string" ? stop : "");
+          }).filter(Boolean).slice(0, 300) : [];
+          state.name = cleanText(draft.name).slice(0, 90);
+          state.start = cleanText(draft.start);
+          state.end = cleanText(draft.end);
+          state.stops = stops.map(makeStop);
+          setFields();
+          if (typeof draft.stopInput === "string") {
+            els.stopInput.value = draft.stopInput.slice(0, 120000);
+          } else if (stops.length) {
+            els.stopInput.value = stops.join("\n");
+          }
+          return !!(state.stops.length || state.name || state.start || state.end || cleanText(els.stopInput.value));
+        }
+
+        function captureRowTops() {
+          var map = {};
+          els.stopList.querySelectorAll(".stop-row").forEach(function (row) {
+            map[row.dataset.id] = row.getBoundingClientRect().top;
+          });
+          return map;
+        }
+
+        function playReorder(previousTops, movedId) {
+          if (!previousTops || prefersReducedMotion()) {
+            var still = movedId && els.stopList.querySelector('[data-id="' + movedId + '"]');
+            if (still) still.classList.add("just-moved");
+            return;
+          }
+          var rows = els.stopList.querySelectorAll(".stop-row");
+          rows.forEach(function (row) {
+            if (row.dataset.id === movedId) row.classList.add("just-moved");
+            var before = previousTops[row.dataset.id];
+            if (typeof before !== "number") return;
+            var delta = before - row.getBoundingClientRect().top;
+            if (Math.abs(delta) < 1) return;
+            row.style.transition = "none";
+            row.style.transform = "translateY(" + delta + "px)";
+          });
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(function () {
+              rows.forEach(function (row) {
+                if (!row.style.transform) return;
+                row.style.transition = "";
+                row.style.transform = "";
+              });
+            });
+          });
+        }
+
+        function focusMovedControl(motion) {
+          if (!motion || !motion.focusAction) return;
+          var row = els.stopList.querySelector('[data-id="' + motion.movedId + '"]');
+          if (!row) return;
+          var button = row.querySelector('[data-action="' + motion.focusAction + '"]');
+          if (button && !button.disabled) button.focus({ preventScroll: true });
         }
 
         function parseCsvRow(line) {
@@ -1101,8 +1280,9 @@
             remove.textContent = "Remove";
             remove.addEventListener("click", function () {
               sessionRoutes = sessionRoutes.filter(function (item) { return item.sessionId !== route.sessionId; });
+              persistSaved();
               renderSavedRoutes();
-              showToast("Removed from this session");
+              showToast("Removed from this browser");
             });
             controls.append(load, exportRoute, remove);
             row.append(info, controls);
@@ -1153,14 +1333,18 @@
             controls.className = "stop-controls";
             var up = document.createElement("button");
             up.type = "button";
+            up.dataset.action = "up";
             up.textContent = "Up";
+            up.setAttribute("aria-label", "Move stop " + (index + 1) + " up");
             up.disabled = index === 0;
-            up.addEventListener("click", function () { moveStop(index, index - 1); });
+            up.addEventListener("click", function () { moveStop(index, index - 1, "up"); });
             var down = document.createElement("button");
             down.type = "button";
+            down.dataset.action = "down";
             down.textContent = "Down";
+            down.setAttribute("aria-label", "Move stop " + (index + 1) + " down");
             down.disabled = index === state.stops.length - 1;
-            down.addEventListener("click", function () { moveStop(index, index + 1); });
+            down.addEventListener("click", function () { moveStop(index, index + 1, "down"); });
             var remove = document.createElement("button");
             remove.type = "button";
             remove.className = "remove";
@@ -1202,7 +1386,9 @@
             els.stopList.appendChild(row);
           });
 
+          var points = routePoints();
           var url = mapsUrl();
+          var overMapsLimit = points.length > MAPS_STOP_LIMIT;
           if (url) {
             els.openMaps.href = url;
             els.stickyMaps.href = url;
@@ -1211,7 +1397,8 @@
             els.openMaps.setAttribute("aria-disabled", "false");
             els.stickyMaps.setAttribute("aria-disabled", "false");
             els.copyButton.disabled = false;
-            els.urlStatus.textContent = routePoints().length + " route points · " + url.length + " characters";
+            els.urlStatus.textContent = points.length + " route points · " +
+              (overMapsLimit ? "over" : "within") + " the " + MAPS_STOP_LIMIT + "-stop Google Maps limit";
           } else {
             els.openMaps.href = "#";
             els.stickyMaps.href = "#";
@@ -1220,23 +1407,49 @@
             els.openMaps.setAttribute("aria-disabled", "true");
             els.stickyMaps.setAttribute("aria-disabled", "true");
             els.copyButton.disabled = true;
-            els.urlStatus.textContent = "Add a start or end so Google Maps has at least two route points.";
+            els.urlStatus.textContent = "Add a start or end so Google Maps has at least two route points. Maps links hold " + MAPS_STOP_LIMIT + " stops, including start and end.";
           }
 
-          if (url.length > 1800) {
+          var mapsTitle = overMapsLimit
+            ? "Google Maps keeps only " + MAPS_STOP_LIMIT + " stops on one link, including start and end."
+            : "Opens this route in Google Maps. Limited to " + MAPS_STOP_LIMIT + " stops, including start and end.";
+          els.openMaps.title = mapsTitle;
+          els.stickyMaps.title = mapsTitle;
+          els.mapsLimit.hidden = overMapsLimit;
+
+          if (overMapsLimit) {
+            var extra = points.length - MAPS_STOP_LIMIT;
             els.urlWarning.hidden = false;
-            els.urlWarning.textContent = "Long route: some apps may drop stops. Split a very long run into shorter sections, such as AM part 1 and part 2.";
+            els.urlWarning.textContent = "Google Maps only keeps " + MAPS_STOP_LIMIT +
+              " stops on one link, including start and end. This route has " + points.length +
+              " and Maps will drop " + extra + ". Split it into sections of " + MAPS_STOP_LIMIT + " or fewer.";
+          } else if (url && url.length > 1800) {
+            els.urlWarning.hidden = false;
+            els.urlWarning.textContent = "This Google Maps link is very long. If a stop is missing after it opens, split the run. Maps still caps a link at 10 stops, including start and end.";
           } else {
             els.urlWarning.hidden = true;
             els.urlWarning.textContent = "";
           }
           renderRunSheet();
+          var motion = pendingMotion;
+          pendingMotion = null;
+          if (motion) {
+            playReorder(motion.previousTops, motion.movedId);
+            focusMovedControl(motion);
+          }
+          persistDraft();
         }
 
-        function moveStop(from, to) {
+        function moveStop(from, to, focusAction) {
           if (to < 0 || to >= state.stops.length || from === to) return;
+          var previousTops = captureRowTops();
           var moved = state.stops.splice(from, 1)[0];
           state.stops.splice(to, 0, moved);
+          pendingMotion = {
+            previousTops: previousTops,
+            movedId: moved.id,
+            focusAction: focusAction || ""
+          };
           render();
         }
 
@@ -1335,8 +1548,11 @@
           els.stopInput.focus();
         });
 
-        [els.routeName, els.routeStart, els.routeEnd].forEach(function (input) {
-          input.addEventListener("input", function () { render(); });
+        [els.routeName, els.routeStart, els.routeEnd, els.stopInput].forEach(function (input) {
+          input.addEventListener("input", function () {
+            if (input === els.stopInput) persistDraft();
+            else render();
+          });
         });
 
         els.addStopForm.addEventListener("submit", function (event) {
@@ -1356,7 +1572,12 @@
         els.copyButton.addEventListener("click", function () {
           var url = mapsUrl();
           if (!url) return;
-          function copied() { showToast("Google Maps link copied"); }
+          function copied() {
+            var count = routePoints().length;
+            showToast(count > MAPS_STOP_LIMIT
+              ? "Link copied. Google Maps keeps only 10 stops."
+              : "Google Maps link copied");
+          }
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(copied).catch(function () { fallbackCopy(url, copied); });
           } else {
@@ -1384,9 +1605,12 @@
         els.saveButton.addEventListener("click", function () {
           var snapshot = routeSnapshot();
           snapshot.sessionId = "route-" + Date.now().toString(36) + "-" + counter;
+          snapshot.savedAt = new Date().toISOString();
           sessionRoutes.unshift(snapshot);
+          if (sessionRoutes.length > SAVED_CAP) sessionRoutes = sessionRoutes.slice(0, SAVED_CAP);
+          var stored = persistSaved();
           renderSavedRoutes();
-          showToast("Saved for this session");
+          showToast(stored === false ? "Saved for this visit only" : "Saved on this browser");
         });
 
         els.exportButton.addEventListener("click", function () { downloadRoute(routeSnapshot()); });
@@ -1457,15 +1681,22 @@
         });
 
         els.dismissOnboarding.addEventListener("click", function () {
+          writeJson(SEEN_KEY, true);
           els.onboarding.close();
           els.stopInput.focus();
         });
 
+        loadSavedFromCache();
+        var restoredWork = restoreDraft();
+        renderSavedRoutes();
         render();
-        if (typeof els.onboarding.showModal === "function") {
-          els.onboarding.showModal();
-        } else {
-          els.onboarding.setAttribute("open", "");
+        var seenIntro = readJson(SEEN_KEY, false) === true;
+        if (!seenIntro && !restoredWork) {
+          if (typeof els.onboarding.showModal === "function") {
+            els.onboarding.showModal();
+          } else {
+            els.onboarding.setAttribute("open", "");
+          }
         }
       }());
     </script>
