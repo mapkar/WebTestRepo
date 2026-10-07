@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Weather</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23080e1c'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ffd15c'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #080e1c;
+    --fg: #e2e8f0;
+    --accent: #78c6ff;
+    --bar: #0e203a;
+    --panel: #0c1628;
+    --border: #4074a8;
+    --hi: #1856a8;
+    --hi-fg: #f4f8ff;
+    --shadow: #03050a;
+    --normal: #e2e8f0;
+    --precip: #5aaaff;
+    --wind: #8cc8aa;
+    --hot: #e67850;
+    --cold: #82bee6;
+    --watch: #e6be46;
+    --warning: #dc4646;
+    --stale: #c88c3c;
+    --muted: #8c929e;
+    --font: "Segoe UI", "Avenir Next", "Helvetica Neue", sans-serif;
+    --mono: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
+  }
+  html[data-theme="high-contrast"] {
+    --bg: #000;
+    --fg: #fff;
+    --accent: #ffe14a;
+    --bar: #000;
+    --panel: #000;
+    --border: #fff;
+    --hi: #ffe14a;
+    --hi-fg: #000;
+    --shadow: #000;
+    --normal: #fff;
+    --precip: #66ffff;
+    --wind: #5dff8a;
+    --hot: #ff5a5a;
+    --cold: #66ffff;
+    --watch: #ffe14a;
+    --warning: #ff7a7a;
+    --stale: #ffe14a;
+    --muted: #c8c8c8;
+  }
+  html[data-theme="night"] {
+    --bg: #0a0908;
+    --fg: #c4baa6;
+    --accent: #d6a860;
+    --bar: #16120e;
+    --panel: #100d0a;
+    --border: #806440;
+    --hi: #704e24;
+    --hi-fg: #ffecd2;
+    --shadow: #040302;
+    --normal: #c4baa6;
+    --precip: #7896be;
+    --wind: #96aa8c;
+    --hot: #c88250;
+    --cold: #82a0be;
+    --watch: #c4a046;
+    --warning: #be5046;
+    --stale: #aa8246;
+    --muted: #6e6a60;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 420px at 8% -10%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
+      var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #app { min-height: 100%; display: flex; flex-direction: column; }
+  .top, .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    background: var(--bar);
+    padding: 10px 16px;
+  }
+  .place {
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .head-temp { font-weight: 750; font-size: 20px; letter-spacing: -0.03em; }
+  .head-cond { display: flex; align-items: center; gap: 6px; font-weight: 650; }
+  .ages { margin-left: auto; color: var(--muted); font-size: 12.5px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px 0; }
+  .tabs button, .foot button, .texty {
+    border: 0;
+    background: var(--bar);
+    color: var(--fg);
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .tabs button[aria-selected="true"] { background: var(--hi); color: var(--hi-fg); font-weight: 750; }
+  .main { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .split { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr); gap: 12px; align-items: start; }
+  .panel {
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 16px 16px;
+    min-width: 0;
+  }
+  .panel h2, .dialog h2 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .banner { border-color: var(--watch); color: var(--watch); }
+  .now-hero { display: grid; grid-template-columns: minmax(180px, 250px) minmax(0, 1fr); gap: 8px 18px; align-items: center; }
+  .temp-xl { font-size: clamp(52px, 7vw, 76px); font-weight: 720; letter-spacing: -0.045em; line-height: 0.9; margin: 0; }
+  .cond { font-size: 22px; font-weight: 700; margin: 6px 0; }
+  .meta { color: var(--muted); margin: 2px 0; }
+  .stat { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+  .precip-line { color: var(--precip); font-weight: 650; margin-top: 8px; }
+  .wx { display: block; width: 100%; height: auto; }
+  .wx-mini { width: 78px; }
+  .wx-sig { width: 36px; height: 26px; }
+  .spark { width: 100%; height: 76px; display: block; margin: 4px 0 8px; }
+  .compass { width: 64px; height: 64px; color: var(--fg); }
+  .sunarc { width: 100%; height: 78px; display: block; margin-top: 6px; }
+  .meter { width: 92px; height: 8px; }
+  .cards, .strip { display: grid; gap: 8px; }
+  .cards { grid-auto-flow: column; grid-auto-columns: 124px; overflow-x: auto; padding-bottom: 4px; }
+  .strip { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .card, .slot, .row, .loc-row, .filter-row {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 14px;
+    color: var(--fg);
+    text-align: left;
+  }
+  .card, .slot { padding: 8px 8px 10px; }
+  .card[aria-selected="true"], .row[aria-selected="true"], .loc-row[aria-selected="true"], .filter-row[aria-selected="true"] {
+    background: var(--hi);
+    color: var(--hi-fg);
+    border-color: var(--accent);
+  }
+  .card .wx-mini { width: 100%; }
+  .card-title, .slot .when { font-weight: 750; font-size: 13px; }
+  .card-temp, .slot .temp { font-weight: 750; }
+  .slot { text-align: center; }
+  .slot .pop, .pop { color: var(--precip); font-variant-numeric: tabular-nums; }
+  .card[aria-selected="true"] .pop, .row[aria-selected="true"] .pop { color: inherit; }
+  .list { display: flex; flex-direction: column; gap: 4px; max-height: min(62vh, 640px); overflow: auto; }
+  .row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 6.2rem 36px 4.6rem 3.1rem 96px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 10px;
+  }
+  .row .short, .clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag { color: var(--watch); font-size: 12px; font-weight: 750; }
+  .muted { color: var(--muted); }
+  .role-normal { color: var(--normal); }
+  .role-precip { color: var(--precip); }
+  .role-wind { color: var(--wind); }
+  .role-hot, .t-hot { color: var(--hot); }
+  .role-cold, .t-cold { color: var(--cold); }
+  .role-watch, .t-warm { color: var(--watch); }
+  .role-warning { color: var(--warning); }
+  .role-stale, .t-stale { color: var(--stale); }
+  .role-muted, .t-none { color: var(--muted); }
+  .callout {
+    margin: 10px 12px 0;
+    border: 3px solid var(--warning);
+    border-radius: 14px;
+    background: var(--bar);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+  .callout button.dismiss, .primary, .ghost {
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 750;
+  }
+  .dismiss, .primary { background: var(--hi); color: var(--hi-fg); }
+  .dismiss { background: var(--warning); color: white; }
+  html[data-theme="high-contrast"] .dismiss { color: #000; }
+  .ghost { background: var(--bar); color: var(--fg); border: 1px solid var(--border); }
+  .foot { gap: 6px; }
+  .foot button { background: transparent; border-radius: 8px; padding: 4px 6px; color: var(--muted); }
+  .foot kbd, kbd {
+    background: var(--hi);
+    color: var(--hi-fg);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-family: inherit;
+    font-weight: 750;
+    font-size: 12px;
+  }
+  .status { color: var(--muted); font-size: 12.5px; }
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--shadow) 72%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 5;
+  }
+  .dialog {
+    width: min(720px, 100%);
+    max-height: min(84vh, 820px);
+    overflow: auto;
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    padding: 16px 18px 18px;
+  }
+  .dialog h2 { display: inline-block; background: var(--hi); color: var(--hi-fg); border-radius: 999px; padding: 3px 10px; text-transform: none; letter-spacing: 0; }
+  .field {
+    width: min(100%, 460px);
+    background: var(--hi);
+    color: var(--hi-fg);
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+  .loc-row, .filter-row { width: 100%; padding: 8px 10px; margin-top: 6px; }
+  .prose { white-space: pre-wrap; font-family: var(--mono); font-size: 13px; line-height: 1.45; }
+  .detail-art { width: min(240px, 70%); }
+  .help-grid { display: grid; grid-template-columns: 7rem 1fr 7rem 1fr; gap: 6px 8px; }
+  .help-grid b { color: var(--accent); }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+  .gfs { color: var(--watch); font-weight: 750; }
+  .empty { color: var(--muted); padding: 12px 0; }
+  @media (max-width: 900px) {
+    .split, .now-hero { grid-template-columns: 1fr; }
+    .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .row { grid-template-columns: 4.2rem 32px 3.6rem 2.6rem minmax(0, 1fr); }
+    .row .meter-wrap { display: none; }
+    .ages { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wx * { animation: none !important; }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite"></div>
+<script>
+(() => {
+  const KEY = "local-weather-html-v1";
+  const CATS = [
+    ["tornado", "tornado"],
+    ["severeThunderstorm", "severe thunderstorm"],
+    ["flashFlood", "flash flood"],
+    ["flood", "flood"],
+    ["winterStorm", "winter storm"],
+    ["ice", "ice"],
+    ["wind", "wind"],
+    ["heat", "heat"],
+    ["denseFog", "dense fog"],
+    ["specialWeatherStatement", "special weather statement"],
+    ["other", "other"]
+  ];
+  const TABS = [
+    ["now", "1 Now"],
+    ["hourly", "2 Hourly"],
+    ["seven", "3 7-day"],
+    ["twelve", "4 12-day"],
+    ["alerts", "5 Alerts"],
+    ["discussion", "6 Discussion"]
+  ];
+
+  const state = {
+    cfg: defaultCfg(),
+    caches: {},
+    tab: "now",
+    overlay: "none",
+    status: "starting",
+    notice: "",
+    selected: 0,
+    filterSel: 0,
+    observation: null,
+    forecast: null,
+    hourly: null,
+    grid: null,
+    extended: null,
+    extendedError: null,
+    alerts: [],
+    alertCache: emptyAlertCache(),
+    alertsAt: null,
+    discussion: null,
+    discussionAvailable: false,
+    precipLine: null,
+    calloutId: null,
+    knownAlertKeys: [],
+    focusLoc: false,
+    draft: "",
+    resolving: false,
+    inflight: { obs: false, fcst: 0, alerts: false },
+    fail: { obs: 0, fcst: 0, alerts: 0 },
+    next: { obs: 0, fcst: 0, alerts: 0 },
+    alertInterval: 30
+  };
+
+  let svgSeq = 0;
+  const motionOk = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function defaultCfg() {
+    return {
+      theme: "default",
+      units: "imperial",
+      active: null,
+      filters: Object.fromEntries(CATS.map(([k]) => [k, true])),
+      dismissed: [],
+      locations: []
+    };
+  }
+  function emptyAlertCache() {
+    const bucket = () => ({ etag: null, alerts: [], fetchedAt: null });
+    return { point: bucket(), zone: bucket(), county: bucket() };
+  }
+
+  function loadStore() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.cfg) state.cfg = { ...defaultCfg(), ...saved.cfg, filters: { ...defaultCfg().filters, ...(saved.cfg.filters || {}) } };
+      if (saved.caches) state.caches = saved.caches;
+    } catch (err) {
+      state.status = "saved settings could not be read";
+    }
+  }
+  function saveStore() {
+    const nick = state.cfg.active;
+    if (nick) {
+      state.caches[nick] = {
+        observation: state.observation,
+        forecast: state.forecast,
+        hourly: state.hourly,
+        grid: state.grid,
+        extended: state.extended,
+        extendedError: state.extendedError,
+        alertCache: state.alertCache,
+        alertsAt: state.alertsAt,
+        discussion: state.discussion,
+        knownAlertKeys: state.knownAlertKeys
+      };
+    }
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ cfg: state.cfg, caches: state.caches }));
+    } catch (err) {
+      state.status = "could not save locally";
+    }
+  }
+  function applyCache(nick) {
+    const c = state.caches[nick] || {};
+    state.observation = c.observation || null;
+    state.forecast = c.forecast || null;
+    state.hourly = c.hourly || null;
+    state.grid = c.grid || null;
+    state.extended = c.extended || null;
+    state.extendedError = c.extendedError || null;
+    state.alertCache = c.alertCache || emptyAlertCache();
+    state.alerts = mergeAlerts(state.alertCache);
+    state.alertsAt = c.alertsAt || null;
+    state.discussion = c.discussion || null;
+    state.discussionAvailable = !!(state.discussion && state.discussion.data);
+    state.knownAlertKeys = c.knownAlertKeys || state.alerts.map(alertKey);
+    state.calloutId = null;
+    recomputePrecip();
+    const loc = active();
+    if (!state.observation && !state.forecast && state.alerts.length === 0) {
+      state.notice = loc ? `No cached weather for ${loc.query} and nothing fetched yet.` : "";
+    } else {
+      state.notice = "";
+    }
+  }
+
+  function active() {
+    return state.cfg.locations.find((l) => l.nickname === state.cfg.active) || null;
+  }
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function num(v) { return typeof v === "number" && Number.isFinite(v) ? v : null; }
+  function rem(a, n) { return ((a % n) + n) % n; }
+  function rad(d) { return d * Math.PI / 180; }
+  function deg(r) { return r * 180 / Math.PI; }
+  function cToF(c) { return c * 9 / 5 + 32; }
+  function fToC(f) { return (f - 32) * 5 / 9; }
+  function slug(q) {
+    const s = q.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32);
+    return s || "location";
+  }
+  function zip5(q) {
+    const digits = q.replace(/\D/g, "");
+    if ((q.length === 5 || (q.length === 10 && q[5] === "-")) && digits.length >= 5 && /^[\d-]+$/.test(q)) return q.slice(0, 5);
+    if (digits.length === 5 && /^\d+$/.test(q)) return q;
+    return null;
+  }
+  function fmtTemp(f) {
+    if (f == null) return "—";
+    return state.cfg.units === "metric" ? `${Math.round(fToC(f))}°C` : `${Math.round(f)}°F`;
+  }
+  function fmtWind(mph) {
+    if (mph == null) return "—";
+    return state.cfg.units === "metric" ? `${Math.round(mph * 0.868976)} kt` : `${Math.round(mph)} mph`;
+  }
+  function fmtPres(inhg) {
+    if (inhg == null) return "—";
+    return state.cfg.units === "metric" ? `${Math.round(inhg * 33.8639)} mb` : `${inhg.toFixed(2)} inHg`;
+  }
+  function fmtPrecip(inches) {
+    if (inches == null) return "—";
+    if (Math.abs(inches) < 0.001) return "0";
+    return state.cfg.units === "metric" ? `${(inches * 25.4).toFixed(1)} mm` : `${inches.toFixed(2)} in`;
+  }
+  function fmtVis(miles) {
+    if (miles == null) return "—";
+    return state.cfg.units === "metric" ? `${(miles * 1.60934).toFixed(1)} km` : `${miles.toFixed(1)} mi`;
+  }
+  function unitsLabel() { return state.cfg.units === "metric" ? "°C kt mb" : "°F mph inHg"; }
+  function compass(degv) {
+    if (degv == null) return "—";
+    const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    return dirs[Math.floor((rem(degv, 360) + 11.25) / 22.5) % 16];
+  }
+  function tempClass(f) {
+    if (f == null) return "t-none";
+    if (f >= 90) return "t-hot";
+    if (f >= 75) return "t-warm";
+    if (f <= 32) return "t-cold";
+    return "";
+  }
+  function conditionRole(text, tempF) {
+    const t = String(text || "").toLowerCase();
+    if (t.includes("tornado") || t.includes("severe")) return "warning";
+    if (t.includes("thunder") || t.includes("rain") || t.includes("shower") || t.includes("drizzle")) return "precip";
+    if (t.includes("snow") || t.includes("sleet") || t.includes("ice") || t.includes("freezing")) return "cold";
+    if (t.includes("wind") || t.includes("breezy") || t.includes("blustery")) return "wind";
+    if (t.includes("fog") || t.includes("haze") || t.includes("mist")) return "muted";
+    if (tempF != null && tempF >= 90) return "hot";
+    if (tempF != null && tempF <= 32) return "cold";
+    return "normal";
+  }
+  function severityRole(sev) {
+    const s = String(sev || "").toLowerCase();
+    if (s === "extreme" || s === "severe") return "warning";
+    if (s === "moderate") return "watch";
+    return "normal";
+  }
+  function categorize(event) {
+    const e = String(event || "").toLowerCase();
+    if (e.includes("tornado")) return "tornado";
+    if (e.includes("severe thunderstorm") || e.includes("thunderstorm")) return "severeThunderstorm";
+    if (e.includes("flash flood")) return "flashFlood";
+    if (e.includes("flood")) return "flood";
+    if (e.includes("ice") || e.includes("freezing") || e.includes("sleet")) return "ice";
+    if (e.includes("winter") || e.includes("blizzard") || e.includes("snow")) return "winterStorm";
+    if (e.includes("wind")) return "wind";
+    if (e.includes("heat")) return "heat";
+    if (e.includes("fog")) return "denseFog";
+    if (e.includes("special weather statement")) return "specialWeatherStatement";
+    return "other";
+  }
+  function allows(cat) { return state.cfg.filters[cat] !== false; }
+  function severityRank(sev) {
+    return { extreme: 5, severe: 4, moderate: 3, minor: 2 }[String(sev || "").toLowerCase()] || 1;
+  }
+  function wmoSummary(code) {
+    const map = { 0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Fog", 51: "Drizzle", 53: "Drizzle", 55: "Drizzle", 56: "Freezing drizzle", 57: "Freezing drizzle", 61: "Rain", 63: "Rain", 65: "Rain", 66: "Freezing rain", 67: "Freezing rain", 71: "Snow", 73: "Snow", 75: "Snow", 77: "Snow grains", 80: "Rain showers", 81: "Rain showers", 82: "Rain showers", 85: "Snow showers", 86: "Snow showers", 95: "Thunderstorm", 96: "Thunderstorm with hail", 99: "Thunderstorm with hail" };
+    return map[code] || "Unknown";
+  }
+  function skyKind(text, daytime) {
+    const t = String(text || "").toLowerCase();
+    if (t.includes("thunder") || t.includes("tstm")) return "storm";
+    if (t.includes("snow") || t.includes("flurr") || t.includes("blizzard") || t.includes("sleet") || t.includes("ice")) return "snow";
+    if (t.includes("rain") || t.includes("shower") || t.includes("drizzle")) return "rain";
+    if (t.includes("fog") || t.includes("mist") || t.includes("haze")) return "fog";
+    if (t.includes("wind") || t.includes("breezy") || t.includes("blustery")) return "wind";
+    if (t.includes("partly") || t.includes("mostly sunny") || t.includes("mostly clear")) return daytime ? "partly" : "partlyNight";
+    if (t.includes("cloud") || t.includes("overcast")) return "cloud";
+    return daytime ? "sun" : "moon";
+  }
+  function ageLabel(iso, now = Date.now()) {
+    if (!iso) return "unknown age";
+    const secs = Math.max(0, Math.floor((now - new Date(iso).getTime()) / 1000));
+    if (secs < 60) return `${secs}s ago`;
+    if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+    if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+    return `${Math.floor(secs / 86400)}d ago`;
+  }
+  function countdown(iso, now = Date.now()) {
+    if (!iso) return "—";
+    const secs = Math.floor((new Date(iso).getTime() - now) / 1000);
+    if (secs <= 0) return "expired";
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+  function ymdInZone(date, timeZone) {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: timeZone || "UTC", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+    const g = (t) => +parts.find((p) => p.type === t).value;
+    return { y: g("year"), m: g("month"), d: g("day") };
+  }
+  function localHM(iso, tz) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "—";
+    return new Intl.DateTimeFormat("en-GB", { timeZone: tz || "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+  }
+  function localDateStr(iso, tz) {
+    const { y, m, d } = ymdInZone(new Date(iso), tz);
+    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+  function shortDate(s) {
+    const [y, m, d] = String(s || "").split("-").map(Number);
+    if (!y || !m || !d) return s || "—";
+    return new Intl.DateTimeFormat("en-US", { weekday: "short", day: "2-digit", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+  }
+  function tzName() { return active()?.point.timeZone || "UTC"; }
+  function dayOfYear(y, m, d) {
+    return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 1)) / 86400000) + 1;
+  }
+  function eventUtc(lat, lon, y, m, d, sunrise) {
+    const zenith = rad(90.833);
+    const latR = rad(lat);
+    const n = dayOfYear(y, m, d);
+    const lngHour = lon / 15;
+    const t = sunrise ? n + (6 - lngHour) / 24 : n + (18 - lngHour) / 24;
+    const mean = 0.9856 * t - 3.289;
+    let el = mean + 1.916 * Math.sin(rad(mean)) + 0.020 * Math.sin(rad(2 * mean)) + 282.634;
+    el = rem(el, 360);
+    let ra = deg(Math.atan(0.91764 * Math.tan(rad(el))));
+    ra = rem(ra, 360);
+    const lQuad = Math.floor(el / 90) * 90;
+    const raQuad = Math.floor(ra / 90) * 90;
+    ra = (ra + (lQuad - raQuad)) / 15;
+    const sinDec = 0.39782 * Math.sin(rad(el));
+    const cosDec = Math.cos(Math.asin(sinDec));
+    const cosH = (Math.cos(zenith) - sinDec * Math.sin(latR)) / (cosDec * Math.cos(latR));
+    if (cosH < -1 || cosH > 1 || !Number.isFinite(cosH)) return null;
+    let h = deg(Math.acos(cosH));
+    if (sunrise) h = 360 - h;
+    h /= 15;
+    const ut = rem(h + ra - 0.06571 * t - 6.622 - lngHour, 24);
+    let hours = Math.floor(ut);
+    let minutes = Math.floor((ut - hours) * 60);
+    let seconds = Math.round(((ut - hours) * 60 - minutes) * 60);
+    if (seconds === 60) { seconds = 0; minutes += 1; }
+    if (minutes === 60) { minutes = 0; hours += 1; }
+    const dayShift = Math.floor(hours / 24);
+    hours %= 24;
+    return new Date(Date.UTC(y, m - 1, d + dayShift, hours, minutes, Math.min(seconds, 59)));
+  }
+  function sunTimes(at) {
+    const loc = active();
+    if (!loc) return null;
+    const tz = tzName();
+    const { y, m, d } = ymdInZone(at || new Date(), tz);
+    const rise = eventUtc(loc.lat, loc.lon, y, m, d, true);
+    const set = eventUtc(loc.lat, loc.lon, y, m, d, false);
+    if (!rise || !set) return null;
+    return { rise, set };
+  }
+  function daytimeNow(at) {
+    const times = sunTimes(at || new Date());
+    if (!times) return true;
+    const now = at || new Date();
+    return now >= times.rise && now < times.set;
+  }
+  function staleObs(o) {
+    if (!o?.observedAt) return true;
+    return (Date.now() - new Date(o.observedAt).getTime()) / 60000 > 90;
+  }
+
+  function fromNws(unitCode, value) {
+    const u = String(unitCode || "").split(":").pop();
+    switch (u) {
+      case "degC": return cToF(value);
+      case "degF": return value;
+      case "km_h-1": return value * 0.621371;
+      case "m_s-1": return value * 2.23694;
+      case "kt":
+      case "kn": return value / 0.868976;
+      case "Pa": return value / 3386.389;
+      case "hPa":
+      case "mbar": return value / 33.8639;
+      case "inHg": return value;
+      case "m": return value / 1609.344;
+      case "mm": return value / 25.4;
+      case "inch":
+      case "in": return value;
+      default: return value;
+    }
+  }
+  function qty(node) {
+    if (!node || node.value == null || typeof node.value !== "number") return null;
+    return fromNws(node.unitCode, node.value);
+  }
+  function series(node) {
+    if (!node || !Array.isArray(node.values)) return [];
+    return node.values.map((v) => {
+      const start = Date.parse(String(v.validTime || "").split("/")[0]);
+      return Number.isFinite(start) && typeof v.value === "number" ? [start, fromNws(node.uom, v.value)] : null;
+    }).filter(Boolean).sort((a, b) => a[0] - b[0]);
+  }
+  function atTime(rows, t) {
+    let val = null;
+    for (const [st, v] of rows) {
+      if (st <= t) val = v;
+      else break;
+    }
+    return val;
+  }
+
+  function jsonp(url) {
+    return new Promise((resolve, reject) => {
+      const cb = "lw_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const timer = setTimeout(() => { cleanup(); reject(new Error("location lookup timed out")); }, 20000);
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error("location lookup failed")); };
+      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      document.head.appendChild(script);
+      function cleanup() {
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        script.remove();
+      }
+    });
+  }
+  async function getJson(url, geo = true) {
+    const res = await fetch(url, {
+      headers: { Accept: geo ? "application/geo+json" : "application/json" },
+      signal: AbortSignal.timeout(25000)
+    });
+    if (res.status === 500 || res.status === 503) throw new Error(`NWS ${res.status} for ${url}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status} for ${url}: ${text.replace(/\s+/g, " ").slice(0, 180)}`);
+    }
+    return res.json();
+  }
+  async function geocode(query) {
+    const q = query.trim();
+    if (!q) throw new Error("enter a US ZIP or street address");
+    const zip = zip5(q);
+    if (zip) return zcta(zip);
+    try {
+      return await oneline(q);
+    } catch (err) {
+      const embedded = q.split(/\D+/).find((p) => p.length === 5);
+      if (embedded) return zcta(embedded);
+      throw err;
+    }
+  }
+  async function oneline(query) {
+    const url = `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(query)}&benchmark=Public_AR_Current&format=jsonp`;
+    const parsed = await jsonp(url);
+    const hit = parsed?.result?.addressMatches?.[0];
+    if (!hit) throw new Error(`Census geocoder found no match for "${query}"`);
+    return { lat: hit.coordinates.y, lon: hit.coordinates.x, label: hit.matchedAddress || query };
+  }
+  async function zcta(zip) {
+    const url = `https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/2/query?where=ZCTA5%3D%27${zip}%27&outFields=ZCTA5,INTPTLAT,INTPTLON&returnGeometry=false&f=json`;
+    let parsed;
+    try {
+      parsed = await getJson(url, false);
+    } catch (err) {
+      parsed = await jsonp(url);
+    }
+    const feat = parsed?.features?.[0];
+    if (!feat) throw new Error(`Census ZCTA has no match for ZIP ${zip}`);
+    const lat = parseFloat(String(feat.attributes.INTPTLAT).trim());
+    const lon = parseFloat(String(feat.attributes.INTPTLON).trim());
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("ZCTA latitude");
+    return { lat, lon, label: `ZIP ${zip}` };
+  }
+  async function points(lat, lon) {
+    const v = await getJson(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`);
+    const p = v.properties;
+    if (!p) throw new Error("points response missing properties");
+    const rel = p.relativeLocation?.properties;
+    return {
+      gridId: p.gridId || "",
+      gridX: p.gridX || 0,
+      gridY: p.gridY || 0,
+      forecast: p.forecast || "",
+      forecastHourly: p.forecastHourly || "",
+      forecastGridData: p.forecastGridData || "",
+      observationStations: p.observationStations || "",
+      forecastZone: p.forecastZone || "",
+      county: p.county || "",
+      timeZone: p.timeZone || "UTC",
+      relativeLocation: rel ? `${rel.city || ""}, ${rel.state || ""}`.replace(/^, |, $/g, "") : "",
+      cwa: p.cwa || "",
+      forecastOffice: p.forecastOffice || ""
+    };
+  }
+  function zoneId(url) { return String(url || "").split("/").pop(); }
+  function officeId(point) {
+    if (point.cwa) return point.cwa;
+    return String(point.forecastOffice || "").split("/").pop();
+  }
+  function haversine(lat1, lon1, lat2, lon2) {
+    const r = 6371;
+    const dlat = rad(lat2 - lat1);
+    const dlon = rad(lon2 - lon1);
+    const a = Math.sin(dlat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dlon / 2) ** 2;
+    return 2 * r * Math.asin(Math.sqrt(a));
+  }
+  async function observation(loc) {
+    const v = await getJson(loc.point.observationStations);
+    const features = v.features || [];
+    let best = null;
+    for (const f of features) {
+      const coords = f.geometry?.coordinates;
+      const id = f.id || "";
+      if (!coords || !id) continue;
+      const d = haversine(loc.lat, loc.lon, coords[1], coords[0]);
+      if (!best || d < best.d) best = { d, id, name: f.properties?.name || "" };
+    }
+    if (!best) throw new Error("no observation stations");
+    const latest = await getJson(`${best.id}/observations/latest`);
+    const p = latest.properties;
+    if (!p) throw new Error("observation missing properties");
+    return {
+      stationId: best.id.split("/").pop(),
+      stationName: best.name || p.stationName || "",
+      text: p.textDescription || "—",
+      observedAt: p.timestamp || null,
+      tempF: qty(p.temperature),
+      dewpointF: qty(p.dewpoint),
+      humidity: qty(p.relativeHumidity),
+      windMph: qty(p.windSpeed),
+      windDir: qty(p.windDirection),
+      gustMph: qty(p.windGust),
+      pressureInhg: qty(p.barometricPressure),
+      visibilityMi: qty(p.visibility)
+    };
+  }
+  function parsePeriods(v) {
+    const props = v.properties;
+    if (!props) throw new Error("forecast missing properties");
+    const periods = (props.periods || []).map((p) => {
+      const unit = p.temperatureUnit || "F";
+      const conv = (t) => (t == null ? null : String(unit).toLowerCase() === "c" ? cToF(t) : t);
+      return {
+        name: p.name || "",
+        start: p.startTime || null,
+        end: p.endTime || null,
+        isDaytime: p.isDaytime !== false,
+        tempF: conv(num(p.temperature)),
+        apparentF: conv(num(p.apparentTemperature)),
+        wind: p.windSpeed || "",
+        windDir: p.windDirection || "",
+        short: p.shortForecast || "",
+        detailed: p.detailedForecast || "",
+        pop: num(p.probabilityOfPrecipitation?.value)
+      };
+    });
+    return { updated: props.updated || null, periods };
+  }
+  async function forecast(url) { return parsePeriods(await getJson(url)); }
+  async function grid(url) {
+    const v = await getJson(url);
+    const props = v.properties;
+    if (!props) throw new Error("grid missing properties");
+    const temp = series(props.temperature);
+    const dew = series(props.dewpoint);
+    const app = series(props.apparentTemperature);
+    const gust = series(props.windGust);
+    const pop = series(props.probabilityOfPrecipitation);
+    const qpf = series(props.quantitativePrecipitation);
+    const sky = series(props.skyCover);
+    const rh = series(props.relativeHumidity);
+    const times = [...new Set([...temp, ...dew, ...app, ...gust, ...pop, ...qpf, ...sky, ...rh].map((r) => r[0]))].sort((a, b) => a - b).slice(0, 48);
+    return {
+      samples: times.map((t) => ({
+        valid: new Date(t).toISOString(),
+        tempF: atTime(temp, t),
+        dewpointF: atTime(dew, t),
+        apparentF: atTime(app, t),
+        gustMph: atTime(gust, t),
+        pop: atTime(pop, t),
+        qpfIn: atTime(qpf, t),
+        sky: atTime(sky, t),
+        rh: atTime(rh, t)
+      }))
+    };
+  }
+  async function outlook(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&forecast_days=12&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto&models=gfs_seamless`;
+    const v = await getJson(url, false);
+    if (v.reason) throw new Error(`Open-Meteo: ${v.reason}`);
+    const daily = v.daily;
+    if (!daily?.time?.length) throw new Error("Open-Meteo daily series empty");
+    const days = daily.time.slice(0, 12).map((date, i) => {
+      const code = num(daily.weather_code?.[i]);
+      return {
+        date,
+        code,
+        summary: code == null ? "" : wmoSummary(code),
+        highF: num(daily.temperature_2m_max?.[i]),
+        lowF: num(daily.temperature_2m_min?.[i]),
+        precipIn: num(daily.precipitation_sum?.[i]),
+        pop: num(daily.precipitation_probability_max?.[i]),
+        windMph: num(daily.wind_speed_10m_max?.[i]),
+        gustMph: num(daily.wind_gusts_10m_max?.[i]),
+        nwsHighF: null,
+        nwsLowF: null
+      };
+    });
+    return { days, source: "NOAA GFS via Open-Meteo (gfs_seamless)" };
+  }
+  function parseAlerts(v, source) {
+    return (v.features || []).map((f) => {
+      const p = f.properties || {};
+      const id = p.id || f.id || "";
+      if (!id) return null;
+      return {
+        id, event: p.event || "", headline: p.headline || "", severity: p.severity || "",
+        urgency: p.urgency || "", certainty: p.certainty || "", onset: p.onset || null,
+        expires: p.expires || null, ends: p.ends || null, sent: p.sent || null, updated: p.updated || null,
+        instruction: p.instruction || "", description: p.description || "", sender: p.senderName || "",
+        area: p.areaDesc || "", source
+      };
+    }).filter(Boolean);
+  }
+  function alertKey(a) { return `${a.id}\t${a.updated || a.sent || ""}`; }
+  function mergeAlerts(cache) {
+    const out = [];
+    for (const a of [...cache.point.alerts, ...cache.zone.alerts, ...cache.county.alerts]) {
+      const existing = out.find((e) => e.id === a.id);
+      if (!existing) out.push({ ...a });
+      else if (alertKey(a) > alertKey(existing)) Object.assign(existing, a);
+    }
+    out.sort((a, b) => severityRank(b.severity) - severityRank(a.severity) || String(a.expires || "").localeCompare(String(b.expires || "")));
+    return out;
+  }
+  async function fetchBucket(url, bucket, source) {
+    const headers = { Accept: "application/geo+json" };
+    if (bucket.etag) headers["If-None-Match"] = bucket.etag;
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(25000) });
+    if (res.status === 500 || res.status === 503) throw new Error(`NWS ${res.status} for ${url}`);
+    if (!res.ok && res.status !== 304) throw new Error(`HTTP ${res.status} for ${url}`);
+    const etag = res.headers.get("etag");
+    if (etag) bucket.etag = etag;
+    bucket.fetchedAt = new Date().toISOString();
+    if (res.status !== 304) bucket.alerts = parseAlerts(await res.json(), source);
+  }
+  async function alertsActive(loc) {
+    const cache = state.alertCache;
+    await fetchBucket(`https://api.weather.gov/alerts/active?point=${loc.lat.toFixed(4)},${loc.lon.toFixed(4)}`, cache.point, "point");
+    await fetchBucket(`https://api.weather.gov/alerts/active?zone=${zoneId(loc.point.forecastZone)}`, cache.zone, "zone");
+    await fetchBucket(`https://api.weather.gov/alerts/active?zone=${zoneId(loc.point.county)}`, cache.county, "county");
+    return mergeAlerts(cache);
+  }
+  async function discussion(loc) {
+    const office = officeId(loc.point);
+    if (!office) return null;
+    try {
+      const list = await getJson(`https://api.weather.gov/products/types/AFD/locations/${office}`);
+      const id = list["@graph"]?.[0]?.["@id"];
+      if (!id) return null;
+      const product = await getJson(id);
+      const text = product.productText || "";
+      return text.trim() ? text : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function recomputePrecip() {
+    const tz = tzName();
+    state.precipLine = state.hourly ? nextPrecip(state.hourly.data.periods, tz) : null;
+    if (state.extended && state.forecast) attachNws(state.extended.data.days, state.forecast.data.periods, tz);
+  }
+  function nextPrecip(periods, tz) {
+    const now = Date.now();
+    const upcoming = periods.filter((p) => new Date(p.end || now).getTime() > now).slice(0, 48);
+    const run = [];
+    for (const p of upcoming) {
+      if ((p.pop || 0) >= 40) run.push(p);
+      else if (run.length) break;
+    }
+    if (!run.length || !run[0].start) return null;
+    let kind = "rain";
+    for (const p of run) {
+      const s = p.short.toLowerCase();
+      if (s.includes("snow") || s.includes("sleet") || s.includes("ice")) kind = "snow";
+      else if (s.includes("thunder")) kind = "storms";
+    }
+    const end = run[run.length - 1].end || run[0].start;
+    return `${kind} likely ${localHM(run[0].start, tz)}–${localHM(end, tz)}`;
+  }
+  function attachNws(days, periods, tz) {
+    days.slice(0, 7).forEach((day) => {
+      let hi = null;
+      let lo = null;
+      for (const p of periods) {
+        if (!p.start || localDateStr(p.start, tz) !== day.date || p.tempF == null) continue;
+        if (p.isDaytime) hi = hi == null ? p.tempF : Math.max(hi, p.tempF);
+        else lo = lo == null ? p.tempF : Math.min(lo, p.tempF);
+      }
+      day.nwsHighF = hi;
+      day.nwsLowF = lo;
+    });
+  }
+  function noteNewAlerts(alerts) {
+    const fresh = alerts.filter((a) => !state.knownAlertKeys.includes(alertKey(a)));
+    state.knownAlertKeys = alerts.map(alertKey);
+    const hit = fresh.find((a) => allows(categorize(a.event)));
+    if (hit) {
+      state.calloutId = hit.id;
+      state.status = `new alert: ${hit.event}`;
+    }
+  }
+  function calloutAlert() {
+    if (!state.calloutId) return null;
+    const a = state.alerts.find((x) => x.id === state.calloutId);
+    if (!a) return null;
+    if (state.cfg.dismissed.includes(alertKey(a))) return null;
+    if (!allows(categorize(a.event))) return null;
+    if (a.expires && new Date(a.expires).getTime() < Date.now()) return null;
+    return a;
+  }
+  function dismissCallout(id) {
+    const target = id || state.calloutId || state.alerts[state.selected]?.id;
+    const a = state.alerts.find((x) => x.id === target);
+    if (!a) return;
+    const key = alertKey(a);
+    if (!state.cfg.dismissed.includes(key)) state.cfg.dismissed.push(key);
+    if (state.calloutId === a.id) state.calloutId = null;
+    saveStore();
+    render();
+  }
+
+  function listLen() {
+    if (state.tab === "hourly") return state.hourly?.data.periods.length || 0;
+    if (state.tab === "seven") return state.forecast?.data.periods.length || 0;
+    if (state.tab === "twelve") return state.extended?.data.days.length || 0;
+    if (state.tab === "alerts") return state.alerts.length;
+    if (state.tab === "now") return state.grid?.data.samples.length || 0;
+    return 0;
+  }
+  function moveSel(delta) {
+    const n = listLen();
+    if (!n) return;
+    state.selected = Math.max(0, Math.min(n - 1, state.selected + delta));
+  }
+  function setTab(tab) {
+    state.tab = tab;
+    state.selected = 0;
+    state.overlay = "none";
+    render();
+  }
+
+  const SKY = {
+    sun: ["#1a4d86", "#e7a85a"],
+    moon: ["#0c1730", "#2a3c5e"],
+    partly: ["#1d568f", "#e3b16a"],
+    partlyNight: ["#141c36", "#3c4d6c"],
+    cloud: ["#3a5d84", "#7d94ad"],
+    rain: ["#243e5c", "#567898"],
+    storm: ["#17142c", "#3a3958"],
+    snow: ["#516684", "#c5d2e0"],
+    fog: ["#66727a", "#b7bdc2"],
+    wind: ["#1c4a48", "#74b0a2"]
+  };
+  function smil(inner) { return motionOk ? inner : ""; }
+  function weatherSvg(text, daytime, mode) {
+    const kind = skyKind(text, daytime);
+    const id = "s" + (++svgSeq);
+    const cls = mode === "hero" ? "wx wx-hero" : mode === "sig" ? "wx wx-sig" : "wx wx-mini";
+    return `<svg class="${cls} kind-${kind}" viewBox="0 0 280 200" role="img" aria-label="${esc(text || kind)}">${plate(id, kind)}${drawKind(kind, id)}</svg>`;
+  }
+  function plate(id, kind) {
+    const [a, b] = SKY[kind];
+    return `<defs>
+      <linearGradient id="${id}sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${a}"/><stop offset="100%" stop-color="${b}"/></linearGradient>
+      <radialGradient id="${id}su" cx="38%" cy="36%" r="65%"><stop offset="0%" stop-color="#fff8d6"/><stop offset="42%" stop-color="#ffd15c"/><stop offset="100%" stop-color="#f08a1a"/></radialGradient>
+      <radialGradient id="${id}mo" cx="32%" cy="32%" r="70%"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#d5def0"/><stop offset="100%" stop-color="#8ea0c0"/></radialGradient>
+      <filter id="${id}sh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#06101c" flood-opacity="0.38"/></filter>
+    </defs><rect x="8" y="8" width="264" height="184" rx="36" fill="url(#${id}sk)"/>`;
+  }
+  function rays(cx, cy, r) {
+    return Array.from({ length: 12 }, (_, i) => `<rect x="${cx - 3.2}" y="${cy - r - 20}" width="6.4" height="16" rx="3" fill="#ffe7a8" transform="rotate(${i * 30} ${cx} ${cy})"/>`).join("");
+  }
+  function sunBody(id, cx, cy, r) {
+    const spin = `<g style="transform-box:view-box;transform-origin:${(cx / 280) * 100}% ${(cy / 200) * 100}%;animation:spin 56s linear infinite">${rays(cx, cy, r)}</g>`;
+    return `${spin}<circle cx="${cx}" cy="${cy}" r="${r + 18}" fill="#ffd56a" opacity="0.2"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}su)"/>`;
+  }
+  function moonBody(id, cx, cy, r) {
+    return `<mask id="${id}mk"><rect width="280" height="200" fill="#000"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/><circle cx="${cx + r * 0.58}" cy="${cy - r * 0.08}" r="${r * 0.82}" fill="#000"/></mask>
+      <circle cx="${cx}" cy="${cy}" r="${r + 10}" fill="#d5def0" opacity="0.12"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id}mo)" mask="url(#${id}mk)"/>`;
+  }
+  function stars() {
+    return [[46, 40], [86, 64], [206, 36], [232, 70], [188, 78]].map(([x, y]) => `<path d="M${x} ${y - 5} l1.4 3.6 3.8.2-3 2.5 1 3.7-3.2-2.1-3.2 2.1 1-3.7-3-2.5 3.8-.2z" fill="#f7f9ff"/>`).join("");
+  }
+  function cloud(id, cx, cy, s, fill) {
+    return `<g transform="translate(${cx} ${cy}) scale(${s})" filter="url(#${id}sh)">
+      <ellipse cx="0" cy="18" rx="62" ry="24" fill="${fill}"/>
+      <ellipse cx="-36" cy="10" rx="32" ry="26" fill="${fill}"/>
+      <ellipse cx="34" cy="6" rx="36" ry="28" fill="${fill}"/>
+      <ellipse cx="-2" cy="-16" rx="30" ry="26" fill="${fill}"/>
+    </g>`;
+  }
+  function rain(id) {
+    const drops = [[92, 0], [124, 0.25], [156, 0.5], [188, 0.1], [108, 0.45], [172, 0.7]];
+    return drops.map(([x, delay]) => `<line x1="${x}" y1="128" x2="${x - 8}" y2="146" stroke="#b9dcff" stroke-width="3.2" stroke-linecap="round">${smil(`<animate attributeName="y1" values="126;162;126" dur="1.15s" begin="${delay}s" repeatCount="indefinite"/><animate attributeName="y2" values="144;180;144" dur="1.15s" begin="${delay}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.15s" begin="${delay}s" repeatCount="indefinite"/>`)}</line>`).join("");
+  }
+  function snow() {
+    return [[100, 0], [132, 0.3], [164, 0.15], [196, 0.5], [118, 0.6], [176, 0.4]].map(([x, delay]) => `<g fill="#f4f8ff">${smil(`<animateTransform attributeName="transform" type="translate" values="0 0; 0 46; 0 0" dur="2.6s" begin="${delay}s" repeatCount="indefinite"/>`)}<circle cx="${x}" cy="132" r="3.2"/><path d="M${x} 124 v16 M${x - 6} 132 h12" stroke="#f4f8ff" stroke-width="1.4"/></g>`).join("");
+  }
+  function drawKind(kind, id) {
+    if (kind === "sun") return sunBody(id, 140, 100, 34);
+    if (kind === "moon") return stars() + moonBody(id, 140, 104, 36);
+    if (kind === "partly") return sunBody(id, 108, 78, 26) + cloud(id, 158, 112, 0.78, "#f5f8fc");
+    if (kind === "partlyNight") return stars() + moonBody(id, 104, 74, 24) + cloud(id, 160, 116, 0.76, "#e7edf5");
+    if (kind === "cloud") return cloud(id, 140, 96, 1, "#f4f7fb");
+    if (kind === "rain") return cloud(id, 140, 78, 0.92, "#f3f7fb") + rain(id);
+    if (kind === "storm") {
+      return cloud(id, 140, 74, 0.96, "#d5dcea") + `<polygon points="150,108 132,142 148,142 136,176 176,128 156,128 170,108" fill="#ffe56a">${smil(`<animate attributeName="opacity" values="1;0.15;1;0.25;1" dur="2.8s" repeatCount="indefinite"/>`)}</polygon>`;
+    }
+    if (kind === "snow") return cloud(id, 140, 74, 0.92, "#f7f9fc") + snow();
+    if (kind === "fog") {
+      return [58, 86, 114, 142].map((y, i) => `<rect x="${28 + (i % 2) * 16}" y="${y}" width="${200 - (i % 2) * 20}" height="16" rx="8" fill="#f4f7f8" opacity="${0.85 - i * 0.12}"/>`).join("");
+    }
+    return [70, 100, 130].map((y, i) => `<path d="M36 ${y} q 30 -16 60 0 t 60 0 t 60 0" fill="none" stroke="#e7fff6" stroke-width="${5 - i}" stroke-linecap="round" stroke-dasharray="10 12">${smil(`<animate attributeName="stroke-dashoffset" from="0" to="-88" dur="${1.4 + i * 0.25}s" repeatCount="indefinite"/>`)}</path>`).join("");
+  }
+  function sparkSvg(vals) {
+    const nums = vals.filter((v) => typeof v === "number");
+    if (!nums.length) return `<p class="muted">No temperature series yet.</p>`;
+    const w = 360;
+    const h = 74;
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+    const span = Math.max(max - min, 0.5);
+    const pts = nums.map((v, i) => {
+      const x = nums.length === 1 ? w / 2 : (i / (nums.length - 1)) * (w - 12) + 6;
+      const y = 8 + (1 - (v - min) / span) * (h - 18);
+      return [x, y];
+    });
+    const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+    const area = `${line} L${pts.at(-1)[0].toFixed(1)} ${h} L${pts[0][0].toFixed(1)} ${h} Z`;
+    const id = "spk" + (++svgSeq);
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Temperature trend from ${Math.round(min)} to ${Math.round(max)} degrees Fahrenheit">
+      <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.45"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/></linearGradient></defs>
+      <path d="${area}" fill="url(#${id})"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
+  }
+  function meterSvg(pct) {
+    const value = pct == null ? 0 : Math.max(0, Math.min(100, pct));
+    const w = Math.round(value / 100 * 88);
+    return `<svg class="meter" viewBox="0 0 88 8" aria-hidden="true"><rect width="88" height="8" rx="4" fill="var(--border)" opacity="0.45"/><rect width="${w}" height="8" rx="4" fill="var(--precip)"/></svg>`;
+  }
+  function compassSvg(dir) {
+    const rot = dir == null ? 0 : dir;
+    return `<svg class="compass" viewBox="0 0 84 84" role="img" aria-label="Wind from ${esc(compass(dir))}">
+      <circle cx="42" cy="42" r="36" fill="none" stroke="currentColor" opacity="0.35" stroke-width="2"/>
+      <text x="42" y="14" text-anchor="middle" font-size="9" fill="currentColor">N</text>
+      <g transform="rotate(${rot.toFixed(1)} 42 42)">
+        <polygon points="42,16 49,46 42,40 35,46" fill="var(--hot)"/>
+        <polygon points="42,70 49,46 42,52 35,46" fill="currentColor" opacity="0.45"/>
+      </g>
+    </svg>`;
+  }
+  function sunArcSvg() {
+    const times = sunTimes(new Date());
+    if (!times) return "";
+    const tz = tzName();
+    const now = Date.now();
+    let t = (now - times.rise.getTime()) / (times.set.getTime() - times.rise.getTime());
+    t = Math.max(0, Math.min(1, t));
+    const x = 24 + t * 232;
+    const y = 58 - Math.sin(t * Math.PI) * 40;
+    const day = daytimeNow();
+    return `<svg class="sunarc" viewBox="0 0 280 78" role="img" aria-label="Sunrise ${esc(localHM(times.rise.toISOString(), tz))} sunset ${esc(localHM(times.set.toISOString(), tz))}">
+      <path d="M24 58 A116 40 0 0 1 256 58" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="${day ? "var(--watch)" : "var(--cold)"}"/>
+      <text x="24" y="74" font-size="11" fill="var(--watch)">${esc(localHM(times.rise.toISOString(), tz))}</text>
+      <text x="256" y="74" font-size="11" text-anchor="end" fill="var(--accent)">${esc(localHM(times.set.toISOString(), tz))}</text>
+    </svg>`;
+  }
+  function rangeSvg(lo, hi) {
+    if (lo == null || hi == null) return "";
+    const pos = (t) => ((Math.max(10, Math.min(110, t)) - 10) / 100) * 200;
+    const a = pos(Math.min(lo, hi));
+    const b = pos(Math.max(lo, hi));
+    return `<svg viewBox="0 0 220 16" width="220" height="16" aria-hidden="true"><line x1="4" y1="8" x2="210" y2="8" stroke="var(--border)" stroke-width="2"/><line x1="${(4 + a).toFixed(1)}" y1="8" x2="${(4 + b).toFixed(1)}" y2="8" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/></svg>`;
+  }
+
+  function ages() {
+    const obs = state.observation ? `obs ${ageLabel(state.observation.fetchedAt)}` : "obs —";
+    const fc = state.forecast ? `nws ${ageLabel(state.forecast.fetchedAt)}` : "nws —";
+    const al = state.alertsAt ? `alerts ${ageLabel(state.alertsAt)}` : "alerts —";
+    return `${obs}  ·  ${fc}  ·  ${al}`;
+  }
+  function header() {
+    const loc = active();
+    const name = loc ? (loc.point.relativeLocation || loc.query) : "no location";
+    let mid = "";
+    const o = state.observation?.data;
+    if (o) {
+      const role = staleObs(o) ? "stale" : conditionRole(o.text, o.tempF);
+      const day = daytimeNow(o.observedAt ? new Date(o.observedAt) : new Date());
+      mid = `<span class="head-temp ${tempClass(o.tempF)}">${esc(fmtTemp(o.tempF))}</span>
+        <span class="head-cond role-${role}">${weatherSvg(o.text, day, "sig")}<span>${esc(o.text)}</span></span>`;
+    }
+    return `<header class="top"><div class="place">${esc(name)}</div>${mid}<div class="ages">${esc(ages())}</div></header>`;
+  }
+  function tabs() {
+    const buttons = TABS.filter(([id]) => id !== "discussion" || state.discussionAvailable).map(([id, label]) =>
+      `<button type="button" data-act="tab" data-tab="${id}" aria-selected="${state.tab === id}">${esc(label)}</button>`
+    ).join("");
+    return `<nav class="tabs" aria-label="Sections">${buttons}</nav>`;
+  }
+  function callout() {
+    const a = calloutAlert();
+    if (!a) return "";
+    const role = severityRole(a.severity);
+    return `<section class="callout" style="border-color:var(--${role === "normal" ? "accent" : role})" data-act="callout">
+      <div><strong class="role-${role}">${esc(a.event)}</strong><div class="muted">expires in ${esc(countdown(a.expires))} · Enter opens · x dismisses</div></div>
+      <button type="button" class="dismiss" data-act="dismiss">x dismiss</button>
+    </section>`;
+  }
+  function footer() {
+    const keys = [["help", "?", "help"], ["location", "l", "place"], ["refresh", "r", "refresh"], ["theme", "t", "theme"], ["units", "u", "units"], ["quit", "q", "quit"]];
+    const buttons = keys.map(([act, k, label]) => `<button type="button" data-act="${act}"><kbd>${k}</kbd> ${label}</button>`).join("");
+    return `<footer class="foot">${buttons}<span class="status">${esc(state.cfg.theme)} · ${esc(unitsLabel())} · ${esc(state.status)}</span></footer>`;
+  }
+  function panel(title, body, extra = "") {
+    return `<section class="panel ${extra}"><h2>${esc(title)}</h2>${body}</section>`;
+  }
+  function meterRow(label, pct) {
+    if (pct == null) return `<div class="stat"><span class="muted">${esc(label)}</span><span class="muted">—</span></div>`;
+    return `<div class="stat"><span class="muted">${esc(label)}</span>${meterSvg(pct)}<span>${Math.round(pct)}%</span></div>`;
+  }
+  function nowPane() {
+    const loc = active();
+    const oWrap = state.observation;
+    let body;
+    if (!oWrap) {
+      body = `<p class="empty">${esc(state.notice || "No cached observation.")}</p>`;
+    } else {
+      const o = oWrap.data;
+      const stale = staleObs(o);
+      const role = stale ? "stale" : conditionRole(o.text, o.tempF);
+      const day = daytimeNow(o.observedAt ? new Date(o.observedAt) : new Date());
+      const age = o.observedAt ? ageLabel(o.observedAt) : "unknown age";
+      body = `<div class="now-hero"><div>${weatherSvg(o.text, day, "hero")}</div><div>
+        <p class="temp-xl ${tempClass(o.tempF)}">${esc(fmtTemp(o.tempF))}</p>
+        <p class="cond role-${role}">${esc(o.text)}</p>
+        <p class="meta ${stale ? "role-stale" : ""}">${stale ? "STALE" : "OK"} · observed ${esc(age)}</p>
+        <p class="meta">${esc(o.stationId)}${o.stationName ? " · " + esc(o.stationName) : ""}</p>
+        <div class="stat">${compassSvg(o.windDir)}<div>wind ${esc(compass(o.windDir))} ${esc(fmtWind(o.windMph))}<br>gust ${esc(fmtWind(o.gustMph))}</div></div>
+        ${meterRow("rh", o.humidity)}
+        <p class="meta">dew ${esc(fmtTemp(o.dewpointF))}</p>
+        <p class="meta">pres ${esc(fmtPres(o.pressureInhg))}</p>
+        <p class="meta">vis ${esc(fmtVis(o.visibilityMi))}</p>
+      </div></div>
+      ${state.precipLine ? `<p class="precip-line">${esc(state.precipLine)}</p>` : `<p class="precip-line">no precip window at or above 40%</p>`}
+      ${sunArcSvg()}
+      <p class="meta">${esc(loc?.query || "")} · grid ${esc(loc?.point.gridId || "")} ${loc?.point.gridX ?? ""},${loc?.point.gridY ?? ""} · ${esc(zoneId(loc?.point.forecastZone || ""))}</p>`;
+    }
+    const samples = state.grid?.data.samples || [];
+    const fetched = state.grid ? ageLabel(state.grid.fetchedAt) : "—";
+    let gridBody;
+    if (!samples.length) gridBody = `<p class="empty">${esc(state.notice || "No cached grid.")}</p>`;
+    else {
+      const s = samples[state.selected] || samples[0];
+      const rows = samples.map((sample, i) => {
+        const when = localHM(sample.valid, tzName());
+        const pop = sample.pop == null ? "—" : `${Math.round(sample.pop)}%`;
+        const sky = sample.sky == null ? "—" : `${Math.round(sample.sky)}%`;
+        return `<button type="button" class="row" data-act="select" data-i="${i}" aria-selected="${i === state.selected}">
+          <span class="muted">${esc(when)}</span><span></span>
+          <span class="${tempClass(sample.tempF)}">${esc(fmtTemp(sample.tempF))}</span>
+          <span class="pop">${esc(pop)}</span>
+          <span class="meter-wrap">${meterSvg(sample.pop)}</span>
+          <span class="clip">sky ${esc(sky)}</span>
+        </button>`;
+      }).join("");
+      gridBody = `${sparkSvg(samples.map((s0) => s0.tempF))}
+        <p class="meta">dew ${esc(fmtTemp(s.dewpointF))} · feels ${esc(fmtTemp(s.apparentF))}<br>
+        gust ${esc(fmtWind(s.gustMph))} · qpf ${esc(fmtPrecip(s.qpfIn))} · rh ${s.rh == null ? "—" : Math.round(s.rh) + "%"}</p>
+        <div class="list">${rows}</div>`;
+    }
+    return `<div class="split">${panel("conditions", body)}${panel(`grid · same cell · ${fetched}`, gridBody)}</div>`;
+  }
+  function periodRow(p, i, hourly) {
+    const when = hourly ? (p.start ? localHM(p.start, tzName()) : p.name) : p.name;
+    const pop = p.pop == null ? "—" : `${Math.round(p.pop)}%`;
+    const role = conditionRole(p.short, p.tempF);
+    return `<button type="button" class="row" data-act="select" data-i="${i}" aria-selected="${i === state.selected}">
+      <span class="muted clip">${esc(when)}</span>
+      <span class="role-${role}">${weatherSvg(p.short, p.isDaytime, "sig")}</span>
+      <span class="${tempClass(p.tempF)}">${esc(fmtTemp(p.tempF))}</span>
+      <span class="pop">${esc(pop)}</span>
+      <span class="meter-wrap">${meterSvg(p.pop)}</span>
+      <span class="short">${esc(p.short)}</span>
+    </button>`;
+  }
+  function periodDetail(p) {
+    if (!p) return `<p class="empty">No period selected.</p>`;
+    const role = conditionRole(p.short, p.tempF);
+    const feels = p.apparentF == null ? "" : ` · feels ${esc(fmtTemp(p.apparentF))}`;
+    return `<div class="detail-art">${weatherSvg(p.short, p.isDaytime, "hero")}</div>
+      <p class="cond role-${role}">${esc(p.name)}</p>
+      <p class="temp-xl ${tempClass(p.tempF)}" style="font-size:42px">${esc(fmtTemp(p.tempF))}</p>
+      <p>${esc(p.short)}</p>
+      <p class="meta">${esc(p.wind)} ${esc(p.windDir)}${feels}</p>
+      ${meterRow("pop", p.pop)}
+      ${p.detailed ? `<div class="prose">${esc(p.detailed)}</div>` : ""}`;
+  }
+  function hourlyPane() {
+    const periods = state.hourly?.data.periods || [];
+    if (!periods.length) return panel("hourly · NWS", `<p class="empty">${esc(state.notice || "No cached hourly.")}</p>`);
+    const shown = periods.slice(0, 8);
+    const slots = shown.map((p) => {
+      const role = conditionRole(p.short, p.tempF);
+      const pop = p.pop == null ? "—" : `${Math.round(p.pop)}%`;
+      return `<div class="slot"><div class="when muted">${esc(p.start ? localHM(p.start, tzName()) : p.name)}</div>
+        <div class="role-${role}">${weatherSvg(p.short, p.isDaytime, "mini")}</div>
+        <div class="temp ${tempClass(p.tempF)}">${esc(fmtTemp(p.tempF))}</div>
+        <div class="pop">${esc(pop)}</div></div>`;
+    }).join("");
+    const popLine = state.precipLine || "no precip window at or above 40%";
+    const strip = panel("next hours · NWS", `<div class="strip">${slots}</div>${sparkSvg(shown.map((p) => p.tempF))}<p class="precip-line">${esc(popLine)}</p>`);
+    const list = panel("hourly · NWS", `<div class="list">${periods.map((p, i) => periodRow(p, i, true)).join("")}</div>`);
+    return `${strip}<div class="split">${list}${panel(periods[state.selected]?.name || "detail", periodDetail(periods[state.selected]))}</div>`;
+  }
+  function cardsHtml(cards) {
+    return `<div class="cards">${cards.map((c) => `<button type="button" class="card" data-act="select" data-i="${c.index}" aria-selected="${c.index === state.selected}">
+      <div class="role-${conditionRole(c.text, c.tempF)}">${weatherSvg(c.text, c.daytime, "mini")}</div>
+      <div class="card-title">${esc(c.title)}</div>
+      <div class="card-temp ${tempClass(c.tempF)}">${esc(c.temp)}</div>
+    </button>`).join("")}</div>`;
+  }
+  function sevenPane() {
+    const periods = state.forecast?.data.periods || [];
+    if (!periods.length) return panel("NWS forecast", `<p class="empty">${esc(state.notice || "No cached NWS forecast.")}</p>`);
+    const cards = periods.filter((p) => p.isDaytime).map((p, _, arr) => p).map((p) => ({
+      index: periods.indexOf(p),
+      title: p.name,
+      temp: fmtTemp(p.tempF),
+      text: p.short,
+      daytime: p.isDaytime,
+      tempF: p.tempF
+    }));
+    const list = panel("NWS forecast", `<div class="list">${periods.map((p, i) => periodRow(p, i, false)).join("")}</div>`);
+    return `${panel("daytime", cardsHtml(cards))}<div class="split">${list}${panel(periods[state.selected]?.name || "detail", periodDetail(periods[state.selected]))}</div>`;
+  }
+  function outlookDetail(d, index) {
+    if (!d) return `<p class="empty">No day selected.</p>`;
+    const role = conditionRole(d.summary, d.highF);
+    let compare;
+    if (index >= 7) compare = `<p class="gfs">Guidance only. Not an NWS forecast.</p>`;
+    else if (d.nwsHighF != null || d.nwsLowF != null) compare = `<p class="meta">NWS same day ${esc(fmtTemp(d.nwsHighF))} / ${esc(fmtTemp(d.nwsLowF))}</p>`;
+    else compare = `<p class="meta">NWS same day —</p>`;
+    return `<div class="detail-art">${weatherSvg(d.summary, true, "hero")}</div>
+      <p class="temp-xl ${tempClass(d.highF)}" style="font-size:36px">${esc(fmtTemp(d.highF))} / ${esc(fmtTemp(d.lowF))}</p>
+      ${rangeSvg(d.lowF, d.highF)}
+      <p class="cond role-${role}">${esc(d.summary)}</p>
+      ${meterRow("pop", d.pop)}
+      <p class="meta">precip ${esc(fmtPrecip(d.precipIn))} · wind ${esc(fmtWind(d.windMph))} · gust ${esc(fmtWind(d.gustMph))}</p>
+      ${compare}`;
+  }
+  function twelvePane() {
+    const banner = panel("12-day outlook · NOAA GFS · not an NWS forecast", `<p>Days 1–7 sit beside the NWS forecast. Days 8–12 are guidance only.</p>`, "banner");
+    if (!state.extended) {
+      const why = state.extendedError || "not loaded";
+      return `${banner}${panel("extended", `<p class="empty">Extended outlook unavailable (${esc(why)}). The NWS 7-day is unchanged.</p>`)}`;
+    }
+    const days = state.extended.data.days;
+    const cards = days.map((d, i) => ({
+      index: i,
+      title: shortDate(d.date),
+      temp: `${fmtTemp(d.highF)}/${fmtTemp(d.lowF)}`,
+      text: d.summary,
+      daytime: true,
+      tempF: d.highF
+    }));
+    const rows = days.map((d, i) => {
+      const pop = d.pop == null ? "—" : `${Math.round(d.pop)}%`;
+      const temps = `${fmtTemp(d.highF)}/${fmtTemp(d.lowF)}`;
+      const role = conditionRole(d.summary, d.highF);
+      return `<button type="button" class="row" data-act="select" data-i="${i}" aria-selected="${i === state.selected}">
+        <span class="muted">${esc(shortDate(d.date))}</span>
+        <span class="role-${role}">${weatherSvg(d.summary, true, "sig")}</span>
+        <span class="${tempClass(d.highF)}">${esc(temps)}</span>
+        <span class="pop">${esc(pop)}</span>
+        <span class="meter-wrap">${i >= 7 ? `<span class="tag">GFS</span>` : ""}</span>
+        <span class="short">${esc(d.summary)}</span>
+      </button>`;
+    }).join("");
+    return `${banner}${panel("daily", cardsHtml(cards))}<div class="split">${panel("1–7 beside NWS · 8–12 GFS only", `<div class="list">${rows}</div>`)}${panel(shortDate(days[state.selected]?.date || ""), outlookDetail(days[state.selected], state.selected))}</div>`;
+  }
+  function alertsPane() {
+    const off = state.alerts.filter((a) => !allows(categorize(a.event))).length;
+    const title = `alerts · ${off} filtered off · f filters`;
+    if (!state.alerts.length) return panel(title, `<p class="empty">No active alerts in cache.</p>`);
+    const rows = state.alerts.map((a, i) => {
+      const on = allows(categorize(a.event));
+      const role = on ? severityRole(a.severity) : "muted";
+      return `<button type="button" class="row" data-act="alert" data-i="${i}" aria-selected="${i === state.selected}">
+        <span class="role-${role}">${on ? "▌" : "·"}</span><span></span>
+        <span class="clip role-${role}" style="grid-column: span 3">${esc(a.event)}${on ? "" : "  filtered"}</span>
+        <span class="clip">${esc(a.severity)} · ${esc(a.certainty)} · exp ${esc(countdown(a.expires))}</span>
+      </button>`;
+    }).join("");
+    return panel(title, `<div class="list">${rows}</div>`);
+  }
+  function discussionPane() {
+    const text = state.discussion?.data || "No area forecast discussion.";
+    return panel("area forecast discussion", `<div class="prose" id="discussion">${esc(text)}</div>`);
+  }
+  function pane() {
+    if (!active() && state.overlay !== "location") {
+      return panel("location", `<p>${esc(state.notice || "No saved location. Press l and enter a US ZIP or street address.")}</p>`);
+    }
+    if (state.tab === "now") return nowPane();
+    if (state.tab === "hourly") return hourlyPane();
+    if (state.tab === "seven") return sevenPane();
+    if (state.tab === "twelve") return twelvePane();
+    if (state.tab === "alerts") return alertsPane();
+    return discussionPane();
+  }
+  function detailBody() {
+    if (state.tab === "alerts") {
+      const a = state.alerts[state.selected];
+      if (!a) return ["alert", "No alert."];
+      const body = `${a.event}\n${a.headline}\nseverity ${a.severity}  urgency ${a.urgency}  certainty ${a.certainty}\nonset ${a.onset || "—"}\nexpires ${a.expires || "—"}\nends ${a.ends || "—"}\nsent ${a.sent || "—"}\nupdated ${a.updated || "—"}\n${a.sender}\n${a.area}\n\n${a.instruction}\n\n${a.description}`;
+      return [a.event, body];
+    }
+    if (state.tab === "seven" || state.tab === "hourly") {
+      const periods = (state.tab === "seven" ? state.forecast?.data.periods : state.hourly?.data.periods) || [];
+      const p = periods[state.selected];
+      if (!p) return ["detail", "No detail."];
+      return [p.name, `${p.name}\n${fmtTemp(p.tempF)}\n${p.short}\n${p.wind} ${p.windDir}\npop ${p.pop == null ? "—" : Math.round(p.pop) + "%"}\n\n${p.detailed}`];
+    }
+    if (state.tab === "twelve") {
+      const d = state.extended?.data.days[state.selected];
+      if (!d) return ["day", "No detail."];
+      const note = state.selected >= 7 ? "\nGuidance only. Not an NWS forecast." : `\nNWS same day ${fmtTemp(d.nwsHighF)} / ${fmtTemp(d.nwsLowF)}`;
+      return [shortDate(d.date), `${fmtTemp(d.highF)} / ${fmtTemp(d.lowF)}\n${d.summary}\npop ${d.pop == null ? "—" : Math.round(d.pop) + "%"}\nprecip ${fmtPrecip(d.precipIn)}  wind ${fmtWind(d.windMph)}  gust ${fmtWind(d.gustMph)}${note}`];
+    }
+    const a = calloutAlert();
+    return a ? [a.event, a.headline || a.event] : ["detail", "No detail."];
+  }
+  function overlay() {
+    if (state.overlay === "help") {
+      return `<div class="scrim" data-act="close"><div class="dialog" role="dialog" aria-labelledby="dlg-title">
+        <h2 id="dlg-title">help</h2>
+        <div class="help-grid">
+          <b>1–6</b><span>tabs</span><b>j / k</b><span>move</span>
+          <b>enter</b><span>open</span><b>x</b><span>dismiss</span>
+          <b>r</b><span>refresh</span><b>a</b><span>alerts</span>
+          <b>l</b><span>location</span><b>t</b><span>theme</span>
+          <b>u</b><span>units</span><b>f</b><span>filters</span>
+          <b>?</b><span>this card</span><b>q</b><span>close dialog</span>
+        </div>
+        <p class="muted">Mouse hits the same tabs, rows, callout, and dismiss. The 12-day pane is NOAA GFS guidance, not an NWS forecast.</p>
+        <p class="muted">Places come from the US Census Bureau. Observations, forecasts, alerts, and the area discussion come from the National Weather Service. Days 8–12 come from Open-Meteo using the NOAA GFS model only. No API key. If a browser blocks these requests from a file on disk, serve this folder with a local web server.</p>
+        <div class="actions"><button type="button" class="primary" data-act="close">close</button></div>
+      </div></div>`;
+    }
+    if (state.overlay === "location") {
+      const rows = state.cfg.locations.map((loc, i) => `<button type="button" class="loc-row" data-act="switch" data-i="${i}" aria-selected="${i === state.selected}">${esc(loc.nickname)} · ${esc(loc.query)} · ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}</button>`).join("");
+      return `<div class="scrim" data-act="close"><form class="dialog" role="dialog" aria-labelledby="dlg-title" data-act="resolve">
+        <h2 id="dlg-title">location</h2>
+        <p>US ZIP or street address</p>
+        <input class="field" id="loc-input" name="q" autocomplete="off" spellcheck="false" placeholder="29672 or 123 Main St, Seneca, SC" aria-label="US ZIP or street address" value="${esc(state.draft)}">
+        <div style="margin-top:10px">${rows || `<p class="muted">No saved locations.</p>`}</div>
+        ${state.notice ? `<p class="role-stale">${esc(state.notice)}</p>` : ""}
+        <div class="actions">
+          <button type="button" class="ghost" data-act="delete-loc">Del</button>
+          <button type="button" class="ghost" data-act="close">Esc</button>
+          <button type="submit" class="primary">Enter</button>
+        </div>
+      </form></div>`;
+    }
+    if (state.overlay === "filters") {
+      const rows = CATS.map(([key, label], i) => `<button type="button" class="filter-row" data-act="filter" data-i="${i}" aria-selected="${i === state.filterSel}">${state.cfg.filters[key] ? "[x]" : "[ ]"}  ${esc(label)}</button>`).join("");
+      return `<div class="scrim" data-act="close"><div class="dialog" role="dialog" aria-labelledby="dlg-title">
+        <h2 id="dlg-title">alert categories</h2>
+        <p class="muted">Disabled categories stay listed, without a callout.</p>
+        ${rows}
+        <div class="actions"><button type="button" class="ghost" data-act="close">close</button></div>
+      </div></div>`;
+    }
+    if (state.overlay === "detail") {
+      const [title, body] = detailBody();
+      const alertOpen = state.tab === "alerts";
+      return `<div class="scrim" data-act="close"><div class="dialog" role="dialog" aria-labelledby="dlg-title">
+        <h2 id="dlg-title">${esc(title)}</h2>
+        <div class="prose" id="detail-body">${esc(body)}</div>
+        <div class="actions">
+          ${alertOpen ? `<button type="button" class="ghost" data-act="dismiss">x dismiss</button>` : ""}
+          <button type="button" class="primary" data-act="close">Esc</button>
+        </div>
+      </div></div>`;
+    }
+    return "";
+  }
+  function render() {
+    const n = listLen();
+    if (state.selected >= n) state.selected = Math.max(0, n - 1);
+    document.documentElement.dataset.theme = state.cfg.theme === "high-contrast" || state.cfg.theme === "night" ? state.cfg.theme : "default";
+    const locFocused = document.activeElement?.id === "loc-input";
+    const mainScroll = document.querySelector(".main")?.scrollTop || 0;
+    svgSeq = 0;
+    document.getElementById("app").innerHTML = `${header()}${callout()}${tabs()}<main class="main">${pane()}</main>${footer()}${overlay()}`;
+    const main = document.querySelector(".main");
+    if (main) main.scrollTop = mainScroll;
+    const selected = document.querySelector('.row[aria-selected="true"], .card[aria-selected="true"]');
+    if (selected && state.tab !== "now") selected.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (state.focusLoc || locFocused) {
+      const input = document.getElementById("loc-input");
+      if (input) {
+        input.focus();
+        const n = input.value.length;
+        input.setSelectionRange(n, n);
+      }
+      state.focusLoc = false;
+    }
+  }
+
+  function backoff(attempt, cap) { return Math.min(2 ** Math.min(attempt, 8), cap); }
+  function serverErr(err) { return /NWS 500|NWS 503/.test(String(err?.message || err)); }
+  async function loadObs() {
+    const loc = active();
+    if (!loc || state.inflight.obs) return;
+    state.inflight.obs = true;
+    try {
+      const data = await observation(loc);
+      state.observation = { fetchedAt: new Date().toISOString(), data };
+      state.fail.obs = 0;
+      state.notice = "";
+      if (loc) loc.lastSuccess = new Date().toISOString();
+      state.status = "observation updated";
+      saveStore();
+    } catch (err) {
+      state.fail.obs += 1;
+      const wait = serverErr(err) ? backoff(state.fail.obs, 300) : Math.max(60, 600);
+      state.next.obs = Date.now() + wait * 1000;
+      state.status = state.observation ? `observation failed (${err.message}); showing cache` : `No cached observation for ${loc.query} and the network request failed: ${err.message}`;
+      if (!state.observation) state.notice = state.status;
+    } finally {
+      state.inflight.obs = false;
+      render();
+    }
+  }
+  async function loadForecasts() {
+    const loc = active();
+    if (!loc || state.inflight.fcst) return;
+    const stalePoints = !loc.pointsResolvedAt || (Date.now() - new Date(loc.pointsResolvedAt).getTime()) >= 86400000;
+    if (stalePoints) {
+      points(loc.lat, loc.lon).then((point) => {
+        loc.point = point;
+        loc.pointsResolvedAt = new Date().toISOString();
+        saveStore();
+      }).catch(() => {});
+    }
+    state.inflight.fcst = 4;
+    const done = () => {
+      state.inflight.fcst -= 1;
+      if (state.inflight.fcst <= 0) {
+        state.inflight.fcst = 0;
+        saveStore();
+        render();
+      }
+    };
+    const fail = (what, err) => {
+      state.status = `${what} failed (${err.message}); showing cache`;
+      if (serverErr(err)) {
+        state.fail.fcst += 1;
+        state.next.fcst = Date.now() + backoff(state.fail.fcst, 300) * 1000;
+      }
+    };
+    forecast(loc.point.forecast).then((data) => {
+      state.forecast = { fetchedAt: new Date().toISOString(), data };
+      state.fail.fcst = 0;
+      recomputePrecip();
+      state.status = "forecast updated";
+    }).catch((err) => fail("forecast", err)).finally(done);
+    forecast(loc.point.forecastHourly).then((data) => {
+      state.hourly = { fetchedAt: new Date().toISOString(), data: { updated: data.updated, periods: data.periods } };
+      recomputePrecip();
+    }).catch((err) => fail("hourly", err)).finally(done);
+    grid(loc.point.forecastGridData).then((data) => {
+      state.grid = { fetchedAt: new Date().toISOString(), data };
+    }).catch((err) => fail("grid", err)).finally(done);
+    outlook(loc.lat, loc.lon).then((data) => {
+      state.extended = { fetchedAt: new Date().toISOString(), data };
+      state.extendedError = null;
+      recomputePrecip();
+    }).catch((err) => {
+      state.extendedError = err.message;
+      state.status = `12-day outlook unavailable: ${err.message}`;
+    }).finally(done);
+  }
+  async function loadAlerts() {
+    const loc = active();
+    if (!loc || state.inflight.alerts) return;
+    state.inflight.alerts = true;
+    try {
+      const alerts = await alertsActive(loc);
+      noteNewAlerts(alerts);
+      state.alerts = alerts;
+      state.alertsAt = new Date().toISOString();
+      state.fail.alerts = 0;
+      state.alertInterval = 30;
+      state.next.alerts = Date.now() + state.alertInterval * 1000;
+      if (!String(state.status).startsWith("new alert")) state.status = `${alerts.length} active alerts`;
+      saveStore();
+    } catch (err) {
+      state.fail.alerts += 1;
+      const wait = backoff(state.fail.alerts, 120);
+      state.next.alerts = Date.now() + wait * 1000;
+      state.status = `alerts failed (${err.message}); showing cache; retry ${wait}s`;
+    } finally {
+      state.inflight.alerts = false;
+      render();
+    }
+  }
+  async function loadDiscussion() {
+    const loc = active();
+    if (!loc) return;
+    const text = await discussion(loc);
+    if (text) {
+      state.discussion = { fetchedAt: new Date().toISOString(), data: text };
+      state.discussionAvailable = true;
+      saveStore();
+      render();
+    } else if (!state.discussion) {
+      state.discussionAvailable = false;
+      if (state.tab === "discussion") state.tab = "now";
+      render();
+    }
+  }
+  function refreshAll() {
+    state.fail.obs = 0;
+    state.fail.fcst = 0;
+    state.next.obs = Date.now() + 600000;
+    state.next.fcst = Date.now() + 1800000;
+    state.next.alerts = Date.now() + 30000;
+    state.status = "refreshing";
+    loadObs();
+    loadForecasts();
+    loadAlerts();
+    loadDiscussion();
+  }
+  async function resolveQuery(query) {
+    if (state.resolving) return;
+    const locExisting = active();
+    state.resolving = true;
+    state.draft = "";
+    state.status = `resolving ${query}`;
+    state.notice = `Resolving ${query}…`;
+    render();
+    try {
+      const hit = await geocode(query);
+      const point = await points(hit.lat, hit.lon);
+      const nick = slug(query);
+      const loc = {
+        nickname: nick,
+        query,
+        lat: hit.lat,
+        lon: hit.lon,
+        point,
+        lastSuccess: null,
+        pointsResolvedAt: new Date().toISOString()
+      };
+      const idx = state.cfg.locations.findIndex((l) => l.nickname === nick);
+      if (idx >= 0) state.cfg.locations[idx] = loc;
+      else state.cfg.locations.push(loc);
+      state.cfg.active = nick;
+      state.overlay = "none";
+      applyCache(nick);
+      state.notice = "";
+      state.status = `resolved ${hit.label || loc.point.relativeLocation || query}`;
+      saveStore();
+      refreshAll();
+    } catch (err) {
+      state.notice = String(err.message || err);
+      state.status = `location failed: ${state.notice}`;
+      if (!locExisting) state.overlay = "location";
+      render();
+    } finally {
+      state.resolving = false;
+    }
+  }
+  function switchTo(i) {
+    const loc = state.cfg.locations[i];
+    if (!loc) return;
+    state.cfg.active = loc.nickname;
+    state.selected = 0;
+    state.overlay = "none";
+    applyCache(loc.nickname);
+    state.status = `switched to ${loc.nickname}`;
+    saveStore();
+    refreshAll();
+  }
+  function deleteSelectedLoc() {
+    if (!state.cfg.locations.length) return;
+    const i = Math.max(0, Math.min(state.selected, state.cfg.locations.length - 1));
+    const [removed] = state.cfg.locations.splice(i, 1);
+    delete state.caches[removed.nickname];
+    if (state.cfg.active === removed.nickname) state.cfg.active = state.cfg.locations[0]?.nickname || null;
+    state.selected = Math.max(0, Math.min(state.selected, state.cfg.locations.length - 1));
+    if (state.cfg.active) applyCache(state.cfg.active);
+    saveStore();
+    render();
+  }
+  function cycleTheme() {
+    state.cfg.theme = state.cfg.theme === "default" ? "high-contrast" : state.cfg.theme === "high-contrast" ? "night" : "default";
+    state.status = `theme ${state.cfg.theme}`;
+    saveStore();
+    render();
+  }
+  function toggleUnits() {
+    state.cfg.units = state.cfg.units === "metric" ? "imperial" : "metric";
+    state.status = `units ${unitsLabel()}`;
+    saveStore();
+    render();
+  }
+  function openSelected() {
+    if (state.tab === "now" && calloutAlert()) {
+      const a = calloutAlert();
+      state.selected = Math.max(0, state.alerts.findIndex((x) => x.id === a.id));
+      state.tab = "alerts";
+      state.overlay = "detail";
+      render();
+      return;
+    }
+    if (state.tab === "discussion" || state.tab === "now") return;
+    if (!listLen()) return;
+    state.overlay = "detail";
+    render();
+  }
+  function openLocation() {
+    state.overlay = "location";
+    state.draft = "";
+    state.selected = Math.max(0, state.cfg.locations.findIndex((l) => l.nickname === state.cfg.active));
+    state.focusLoc = true;
+    state.notice = active() ? "" : "No saved location. Enter a US ZIP or street address.";
+    render();
+  }
+
+  document.getElementById("app").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-act]");
+    if (!el) return;
+    const act = el.dataset.act;
+    if (act === "close" && el.classList.contains("scrim") && e.target !== el) return;
+    if (act === "tab") setTab(el.dataset.tab);
+    else if (act === "select") { state.selected = +el.dataset.i; render(); }
+    else if (act === "alert") { state.selected = +el.dataset.i; state.overlay = "detail"; render(); }
+    else if (act === "help") { state.overlay = "help"; render(); }
+    else if (act === "location") openLocation();
+    else if (act === "refresh") refreshAll();
+    else if (act === "theme") cycleTheme();
+    else if (act === "units") toggleUnits();
+    else if (act === "quit") { state.status = "This page stays open. Close the browser tab to leave."; if (state.overlay !== "none") state.overlay = "none"; render(); }
+    else if (act === "dismiss") { e.stopPropagation(); dismissCallout(); }
+    else if (act === "callout") openSelected();
+    else if (act === "close") { if (state.overlay === "location" && !active()) return; state.overlay = "none"; render(); }
+    else if (act === "switch") switchTo(+el.dataset.i);
+    else if (act === "delete-loc") deleteSelectedLoc();
+    else if (act === "filter") {
+      state.filterSel = +el.dataset.i;
+      const key = CATS[state.filterSel][0];
+      state.cfg.filters[key] = !state.cfg.filters[key];
+      saveStore();
+      render();
+    }
+  });
+  document.getElementById("app").addEventListener("input", (e) => {
+    if (e.target.id === "loc-input") state.draft = e.target.value;
+  });
+  document.getElementById("app").addEventListener("submit", (e) => {
+    if (e.target.dataset.act !== "resolve") return;
+    e.preventDefault();
+    const query = (state.draft || String(new FormData(e.target).get("q") || "")).trim();
+    if (query) resolveQuery(query);
+    else if (state.cfg.locations[state.selected]) switchTo(state.selected);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (state.overlay === "location") {
+      if (e.key === "Escape") {
+        if (active()) { state.overlay = "none"; render(); }
+        return;
+      }
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const n = state.cfg.locations.length;
+        if (!n) return;
+        state.selected = e.key === "ArrowUp" ? Math.max(0, state.selected - 1) : Math.min(n - 1, state.selected + 1);
+        state.focusLoc = true;
+        render();
+        return;
+      }
+      if (e.key === "Delete" && !document.getElementById("loc-input")?.value) {
+        deleteSelectedLoc();
+      }
+      return;
+    }
+    if (state.overlay === "help") {
+      state.overlay = "none";
+      render();
+      return;
+    }
+    if (state.overlay === "filters") {
+      if (["Escape", "f", "Enter"].includes(e.key)) { state.overlay = "none"; render(); return; }
+      if (e.key === "j" || e.key === "ArrowDown") { state.filterSel = Math.min(CATS.length - 1, state.filterSel + 1); render(); return; }
+      if (e.key === "k" || e.key === "ArrowUp") { state.filterSel = Math.max(0, state.filterSel - 1); render(); return; }
+      if (e.key === " " || e.key === "x") {
+        e.preventDefault();
+        const key = CATS[state.filterSel][0];
+        state.cfg.filters[key] = !state.cfg.filters[key];
+        saveStore();
+        render();
+      }
+      return;
+    }
+    if (state.overlay === "detail") {
+      const body = document.getElementById("detail-body");
+      if (e.key === "Escape" || e.key === "q" || e.key === "Enter") { state.overlay = "none"; render(); return; }
+      if ((e.key === "j" || e.key === "ArrowDown") && body) { body.parentElement.scrollTop += 32; return; }
+      if ((e.key === "k" || e.key === "ArrowUp") && body) { body.parentElement.scrollTop -= 32; return; }
+      if (e.key === "x") { dismissCallout(); state.overlay = "none"; render(); }
+      return;
+    }
+    const tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (e.key >= "1" && e.key <= "6") {
+      const tab = TABS[+e.key - 1][0];
+      if (tab === "discussion" && !state.discussionAvailable) return;
+      setTab(tab);
+      return;
+    }
+    const actions = {
+      "?": () => { state.overlay = "help"; render(); },
+      q: () => { state.status = "This page stays open. Close the browser tab to leave."; render(); },
+      j: () => { if (state.tab === "discussion") { document.querySelector(".main").scrollTop += 32; return; } moveSel(1); render(); },
+      ArrowDown: () => { moveSel(1); render(); },
+      k: () => { if (state.tab === "discussion") { document.querySelector(".main").scrollTop -= 32; return; } moveSel(-1); render(); },
+      ArrowUp: () => { moveSel(-1); render(); },
+      r: refreshAll,
+      a: () => { state.next.alerts = Date.now(); state.status = "refreshing alerts"; loadAlerts(); },
+      l: openLocation,
+      t: cycleTheme,
+      u: toggleUnits,
+      x: () => dismissCallout(),
+      Enter: openSelected,
+      f: () => { if (state.tab === "alerts") { state.overlay = "filters"; render(); } }
+    };
+    if (actions[e.key]) {
+      if (e.key === " ") e.preventDefault();
+      actions[e.key]();
+    }
+  });
+
+  setInterval(() => {
+    if (!active()) return;
+    const now = Date.now();
+    if (now >= state.next.obs && !state.inflight.obs) {
+      state.next.obs = now + 600000;
+      loadObs();
+    }
+    if (now >= state.next.fcst && !state.inflight.fcst) {
+      state.next.fcst = now + 1800000;
+      loadForecasts();
+    }
+    if (now >= state.next.alerts && !state.inflight.alerts) loadAlerts();
+    const agesEl = document.querySelector(".ages");
+    if (agesEl && state.overlay === "none") agesEl.textContent = ages();
+  }, 1000);
+
+  loadStore();
+  document.documentElement.dataset.theme = state.cfg.theme;
+  const params = new URLSearchParams(location.search);
+  const startupQuery = params.get("zip") || params.get("address");
+  const startupTab = params.get("tab");
+  if (TABS.some(([id]) => id === startupTab)) state.tab = startupTab;
+  if (startupQuery) {
+    state.overlay = "none";
+    state.status = `resolving ${startupQuery}`;
+    render();
+    resolveQuery(startupQuery.trim());
+  } else if (state.cfg.active) {
+    applyCache(state.cfg.active);
+    state.status = `cached ${active()?.point.relativeLocation || active()?.query || ""}`;
+    render();
+    refreshAll();
+  } else {
+    state.overlay = "location";
+    state.notice = "No saved location. Enter a US ZIP or street address.";
+    state.focusLoc = true;
+    state.status = "no location";
+    render();
+  }
+})();
+</script>
+</body>
+</html>
