@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>SubRoute — Bus Route Builder</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --page: #eef2f3;
+        --surface: #ffffff;
+        --surface-2: #f5f7f7;
+        --ink: #142026;
+        --muted: #526168;
+        --line: #ccd5d8;
+        --line-strong: #a8b6ba;
+        --accent: #c95420;
+        --accent-hover: #a94119;
+        --accent-ink: #ffffff;
+        --focus: #006b78;
+        --warning-bg: #fff2d6;
+        --warning-ink: #6b4200;
+        --danger: #a3342f;
+        --success: #286a47;
+        --shadow: 0 12px 35px rgba(34, 48, 54, 0.09);
+        --radius: 14px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #111719;
+          --surface: #1b2427;
+          --surface-2: #222d31;
+          --ink: #f1f4f3;
+          --muted: #b4c0c3;
+          --line: #39474b;
+          --line-strong: #536368;
+          --accent: #ef7b43;
+          --accent-hover: #ff925f;
+          --accent-ink: #1a100b;
+          --focus: #67c7d1;
+          --warning-bg: #3b2d12;
+          --warning-ink: #ffd787;
+          --danger: #ff928b;
+          --success: #79c99b;
+          --shadow: 0 15px 40px rgba(0, 0, 0, 0.28);
+        }
+      }
+
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+
+      html { min-width: 320px; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(rgba(77, 101, 108, 0.055) 1px, transparent 1px),
+          var(--page);
+        background-size: 100% 32px;
+        color: var(--ink);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.45;
+      }
+
+      button, input, textarea { font: inherit; }
+      button, .button, input, textarea, summary { -webkit-tap-highlight-color: transparent; }
+
+      button, .button {
+        min-height: 46px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        padding: 0.68rem 0.92rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        font-weight: 730;
+        line-height: 1.1;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+      }
+
+      button:focus-visible, .button:focus-visible, input:focus-visible,
+      textarea:focus-visible, summary:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+        outline-offset: 2px;
+      }
+
+      button:disabled, .button.is-disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+        pointer-events: none;
+      }
+
+      .button-primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+      .button-primary:hover { background: var(--accent-hover); }
+
+      .button-secondary {
+        background: var(--surface);
+        color: var(--ink);
+        border-color: var(--line-strong);
+      }
+      .button-secondary:hover { background: var(--surface-2); }
+
+      .button-quiet {
+        background: transparent;
+        color: var(--muted);
+        border-color: var(--line);
+      }
+      .button-quiet:hover { color: var(--ink); background: var(--surface-2); }
+
+      .button-danger { color: var(--danger); }
+
+      .app-shell {
+        width: min(1040px, 100%);
+        margin: 0 auto;
+        padding: 26px 16px 72px;
+      }
+
+      .product-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 24px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      .route-mark {
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        color: var(--accent);
+      }
+      .product-name {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(1.55rem, 5vw, 2.15rem);
+        line-height: 1;
+        letter-spacing: -0.025em;
+      }
+      .tagline {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 0.98rem;
+        font-weight: 590;
+      }
+
+      h1, h2, h3, p { margin-top: 0; }
+
+      .onboarding {
+        width: min(620px, calc(100% - 28px));
+        max-height: calc(100vh - 28px);
+        overflow: auto;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      }
+      .onboarding::backdrop { background: rgba(9, 16, 19, 0.62); }
+      .onboarding-inner { padding: 26px; }
+      .onboarding h2 {
+        margin-bottom: 7px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.75rem;
+        letter-spacing: -0.02em;
+      }
+      .onboarding-lead { color: var(--muted); margin-bottom: 22px; }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 0 0 24px;
+        padding: 0;
+        list-style: none;
+      }
+      .step {
+        min-width: 0;
+        padding: 15px 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface-2);
+      }
+      .step-number {
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        margin-bottom: 10px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 0.8rem;
+        font-weight: 850;
+      }
+      .step strong { display: block; margin-bottom: 4px; }
+      .step span { color: var(--muted); font-size: 0.86rem; }
+      .onboarding-actions { display: flex; justify-content: flex-end; }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.28fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .setup-card { padding: 20px; }
+      .route-card { overflow: hidden; }
+
+      .section-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .section-heading h2 {
+        margin: 0;
+        font-size: 1.24rem;
+        line-height: 1.15;
+      }
+      .count {
+        color: var(--muted);
+        font-size: 0.88rem;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .field { margin-bottom: 15px; }
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .optional {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      input, textarea {
+        width: 100%;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface-2);
+        color: var(--ink);
+        padding: 0.76rem 0.8rem;
+      }
+      input { min-height: 46px; }
+      textarea {
+        min-height: 176px;
+        resize: vertical;
+        line-height: 1.42;
+      }
+      input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.78; }
+
+      .hint {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.81rem;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+      .button-row > * { flex: 1 1 auto; }
+
+      .field-message {
+        min-height: 1.2em;
+        margin: 10px 0 0;
+        color: var(--danger);
+        font-size: 0.86rem;
+        font-weight: 650;
+      }
+
+      .route-top {
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .route-top .section-heading { margin-bottom: 12px; }
+      .route-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .route-actions button { padding-inline: 0.55rem; }
+      .import-control {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .import-control label { margin: 0; color: var(--muted); }
+      .import-control input[type="file"] {
+        min-height: 44px;
+        padding: 4px;
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+      .import-control input[type="file"]::file-selector-button {
+        min-height: 34px;
+        margin-right: 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: 6px;
+        padding: 0.4rem 0.64rem;
+        background: var(--surface-2);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .empty-state {
+        padding: 42px 22px 46px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .empty-state strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ink);
+        font-size: 1.04rem;
+      }
+
+      .stop-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .stop-row {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .stop-row.dragging { opacity: 0.42; }
+      .stop-row.drag-over { box-shadow: inset 0 3px 0 var(--accent); }
+      .drag-handle {
+        width: 30px;
+        min-height: 44px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0;
+        cursor: grab;
+        color: var(--muted);
+        background:
+          radial-gradient(circle, currentColor 1.5px, transparent 1.7px) 7px 12px / 8px 8px;
+      }
+      .drag-handle:active { cursor: grabbing; }
+      .stop-copy { min-width: 0; }
+      .stop-number {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--accent);
+        font-size: 0.72rem;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .stop-address { overflow-wrap: anywhere; font-weight: 650; }
+      .stop-controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 5px;
+      }
+      .stop-controls button {
+        min-height: 38px;
+        padding: 0.45rem 0.57rem;
+        font-size: 0.78rem;
+        background: transparent;
+        color: var(--muted);
+        border-color: var(--line);
+      }
+      .stop-controls button:hover { color: var(--ink); background: var(--surface-2); }
+      .stop-controls .remove:hover { color: var(--danger); }
+
+      .add-stop {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-2);
+      }
+      .add-stop input { background: var(--surface); }
+
+      .map-panel { padding: 16px 18px 18px; }
+      .map-panel .button-row { margin-bottom: 10px; }
+      .route-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 15px;
+        align-items: center;
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .route-stats strong { color: var(--ink); }
+      .url-warning {
+        margin: 12px 0 0;
+        padding: 10px 11px;
+        border-radius: 8px;
+        background: var(--warning-bg);
+        color: var(--warning-ink);
+        font-size: 0.86rem;
+        font-weight: 650;
+      }
+
+      .confirm-dialog {
+        width: min(430px, calc(100% - 28px));
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+      }
+      .confirm-dialog::backdrop { background: rgba(9, 16, 19, 0.62); }
+      .confirm-inner { padding: 23px; }
+      .confirm-inner h2 { margin-bottom: 8px; font-size: 1.35rem; }
+      .confirm-inner p { color: var(--muted); margin-bottom: 20px; }
+      .confirm-actions { display: flex; justify-content: flex-end; gap: 9px; }
+      .clear-confirm { background: var(--danger); color: var(--surface); }
+
+      .sticky-action {
+        display: none;
+      }
+
+      .product-footer {
+        margin-top: 22px;
+        padding: 12px 2px 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+      }
+
+      .saved-section {
+        margin-top: 18px;
+        padding: 18px 20px 20px;
+      }
+      .saved-section .section-heading { margin-bottom: 10px; }
+      .saved-note { margin: 0 0 14px; color: var(--muted); font-size: 0.88rem; }
+      .saved-list { display: grid; gap: 8px; }
+      .saved-route {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .saved-route:first-child { border-top: 0; }
+      .saved-name { font-weight: 760; overflow-wrap: anywhere; }
+      .saved-meta { color: var(--muted); font-size: 0.8rem; }
+      .saved-controls { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+      .saved-controls button { min-height: 39px; padding: 0.5rem 0.66rem; font-size: 0.8rem; }
+
+      .toast {
+        position: fixed;
+        z-index: 20;
+        left: 50%;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        width: max-content;
+        max-width: calc(100% - 32px);
+        transform: translate(-50%, 18px);
+        padding: 11px 15px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: var(--surface);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 160ms ease, transform 160ms ease;
+        font-weight: 700;
+        text-align: center;
+      }
+      .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+      .run-sheet {
+        display: none;
+        width: min(800px, calc(100% - 32px));
+        margin: 22px auto 70px;
+        padding: 34px;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .preview-mode .app-shell { display: none; }
+      .preview-mode .run-sheet { display: block; }
+      .preview-tools {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+      }
+      .run-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 20px;
+        align-items: end;
+        padding-bottom: 18px;
+        border-bottom: 3px solid var(--ink);
+      }
+      .run-header h1 {
+        margin: 0;
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 2rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+      .run-date { text-align: right; font-weight: 720; }
+      .run-endpoints {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin: 20px 0;
+      }
+      .run-point {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line-strong);
+      }
+      .run-label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.73rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .run-stops { margin: 0; padding-left: 2rem; }
+      .run-stops li {
+        padding: 9px 4px 9px 7px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 650;
+      }
+      .check-box {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        margin: 0 9px 0 2px;
+        vertical-align: -2px;
+        border: 1.5px solid currentColor;
+      }
+      .run-notes {
+        margin-top: 26px;
+        padding-bottom: 9px;
+        border-bottom: 1px solid var(--line-strong);
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      @media (max-width: 800px) {
+        .workspace { grid-template-columns: 1fr; }
+        .route-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 540px) {
+        .app-shell { padding: 16px 12px 112px; }
+        .product-header { gap: 11px; margin-bottom: 16px; padding: 0 2px 15px; }
+        .route-mark { width: 44px; height: 44px; flex-basis: 44px; }
+        .tagline { font-size: 0.88rem; }
+        .steps { grid-template-columns: 1fr; }
+        .onboarding-inner { padding: 21px 18px 18px; }
+        .onboarding-actions button { width: 100%; }
+        .setup-card { padding: 17px 14px; }
+        .route-top { padding: 16px 14px 13px; }
+        .field-grid { grid-template-columns: 1fr; gap: 0; }
+        .route-actions { grid-template-columns: 1fr 1fr; }
+        .import-control { grid-template-columns: 1fr; }
+        .stop-row {
+          grid-template-columns: 26px minmax(0, 1fr);
+          gap: 8px;
+          padding: 12px 10px;
+        }
+        .drag-handle { width: 26px; }
+        .stop-controls { grid-column: 2; justify-content: flex-start; }
+        .stop-controls button { min-height: 42px; flex: 1 1 auto; }
+        .add-stop { grid-template-columns: 1fr; padding: 12px; }
+        .add-stop button { width: 100%; }
+        .saved-section { padding: 16px 14px; }
+        .saved-route { grid-template-columns: 1fr; }
+        .saved-controls { justify-content: stretch; }
+        .saved-controls button { flex: 1; }
+        .run-sheet { width: calc(100% - 20px); margin-top: 10px; padding: 20px 16px; }
+        .preview-tools { align-items: flex-start; flex-direction: column; }
+        .run-header { grid-template-columns: 1fr; }
+        .run-date { text-align: left; }
+        .run-endpoints { grid-template-columns: 1fr; gap: 0; }
+        .sticky-action {
+          position: fixed;
+          z-index: 15;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+          border-top: 1px solid var(--line);
+          background: var(--surface);
+          box-shadow: 0 -10px 28px rgba(18, 31, 36, 0.14);
+        }
+        .sticky-action .button { flex: 1; min-height: 52px; }
+        .sticky-count {
+          flex: 0 0 auto;
+          color: var(--muted);
+          font-size: 0.82rem;
+          font-weight: 700;
+          text-align: right;
+        }
+        .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+      }
+
+      @media print {
+        @page { margin: 0.55in; }
+        :root {
+          --surface: #fff;
+          --ink: #000;
+          --muted: #333;
+          --line: #c8c8c8;
+          --line-strong: #777;
+        }
+        body { background: #fff; color: #000; }
+        .app-shell, .toast, .preview-tools, .sticky-action, dialog { display: none !important; }
+        .run-sheet {
+          display: block !important;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          box-shadow: none;
+        }
+        .run-header h1 { font-size: 22pt; }
+        .run-stops li { break-inside: avoid; font-size: 11pt; }
+      }
+    </style>
+  </head>
+  <body>
+    <dialog id="onboarding" class="onboarding" aria-labelledby="onboardingTitle">
+      <div class="onboarding-inner">
+        <h2 id="onboardingTitle">How it works</h2>
+        <p class="onboarding-lead">Three quick steps from dispatch list to a route you can drive.</p>
+        <ol class="steps">
+          <li class="step"><span class="step-number">1</span><strong>Paste stops</strong><span>Use one address per line or paste an address-column CSV.</span></li>
+          <li class="step"><span class="step-number">2</span><strong>Put them in order</strong><span>Drag stops or use the Up and Down buttons.</span></li>
+          <li class="step"><span class="step-number">3</span><strong>Open the route</strong><span>Send the full run straight to Google Maps.</span></li>
+        </ol>
+        <div class="onboarding-actions">
+          <button id="dismissOnboarding" class="button-primary" type="button">Build a route</button>
+        </div>
+      </div>
+    </dialog>
+
+    <main class="app-shell">
+      <header class="product-header">
+        <svg class="route-mark" viewBox="0 0 64 64" role="img" aria-label="Bus following a route">
+          <path d="M9 49c0-9 7-14 16-14h14c9 0 16-5 16-14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 8" />
+          <rect x="8" y="9" width="36" height="30" rx="7" fill="currentColor" />
+          <path d="M14 17h24v10H14z" fill="var(--surface)" />
+          <circle cx="17" cy="40" r="5" fill="var(--ink)" />
+          <circle cx="36" cy="40" r="5" fill="var(--ink)" />
+          <circle cx="17" cy="40" r="2" fill="var(--surface)" />
+          <circle cx="36" cy="40" r="2" fill="var(--surface)" />
+          <circle cx="55" cy="17" r="5" fill="var(--surface)" stroke="currentColor" stroke-width="4" />
+        </svg>
+        <div>
+          <h1 class="product-name">SubRoute — Bus Route Builder</h1>
+          <p class="tagline">From stop list to turn-by-turn in two minutes</p>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <section class="card setup-card" aria-labelledby="setupTitle">
+          <div class="section-heading">
+            <h2 id="setupTitle">Set up the run</h2>
+          </div>
+
+          <div class="field">
+            <label for="routeName">Route name <span class="optional">optional</span></label>
+            <input id="routeName" type="text" maxlength="90" placeholder="Example: 425 AM cover" autocomplete="off" />
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="routeStart">Start <span class="optional">optional</span></label>
+              <input id="routeStart" type="text" maxlength="300" placeholder="Bus lot or first school" autocomplete="street-address" />
+            </div>
+            <div class="field">
+              <label for="routeEnd">End <span class="optional">optional</span></label>
+              <input id="routeEnd" type="text" maxlength="300" placeholder="Final school or bus lot" autocomplete="street-address" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="stopInput">Stops</label>
+            <textarea id="stopInput" placeholder="104 Pine St, Seneca, SC&#10;220 Northwoods Dr, Seneca, SC&#10;…" spellcheck="false"></textarea>
+            <span class="hint">One per line works best. CSV headers such as “address, city, state, zip” are recognized.</span>
+          </div>
+
+          <div class="button-row">
+            <button id="buildButton" class="button-primary" type="button">Build route</button>
+            <button id="sampleButton" class="button-secondary" type="button">Load sample stops</button>
+          </div>
+          <p id="inputMessage" class="field-message" role="alert"></p>
+        </section>
+
+        <section class="card route-card" aria-labelledby="routeTitle">
+          <div class="route-top">
+            <div class="section-heading">
+              <h2 id="routeTitle">Current route</h2>
+              <span id="stopCount" class="count">0 stops</span>
+            </div>
+            <div class="route-actions">
+              <button id="saveButton" class="button-secondary" type="button" disabled>Save session</button>
+              <button id="exportButton" class="button-secondary" type="button" disabled>Export JSON</button>
+              <button id="previewButton" class="button-quiet" type="button" disabled>Run sheet</button>
+              <button id="clearButton" class="button-quiet button-danger" type="button" disabled>Clear route</button>
+            </div>
+            <div class="import-control">
+              <label for="importInput">Import JSON</label>
+              <input id="importInput" type="file" accept="application/json,.json" />
+            </div>
+          </div>
+
+          <div id="emptyState" class="empty-state">
+            <strong>No stops yet</strong>
+            Paste a list or load the sample to get started.
+          </div>
+
+          <ol id="stopList" class="stop-list" aria-label="Ordered route stops"></ol>
+
+          <form id="addStopForm" class="add-stop" hidden>
+            <label class="visually-hidden" for="addStopInput">Add a one-off stop</label>
+            <input id="addStopInput" type="text" maxlength="300" placeholder="Add a one-off stop" autocomplete="street-address" />
+            <button class="button-secondary" type="submit">Add stop</button>
+          </form>
+
+          <div id="mapPanel" class="map-panel" hidden>
+            <div class="button-row">
+              <a id="openMaps" class="button button-primary is-disabled" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Open in Google Maps</a>
+              <button id="copyButton" class="button-secondary" type="button" disabled>Copy Maps URL</button>
+            </div>
+            <p class="route-stats"><strong id="statsStops">0 stops</strong><span id="urlStatus"></span></p>
+            <p id="urlWarning" class="url-warning" hidden></p>
+          </div>
+        </section>
+      </div>
+
+      <section id="savedSection" class="card saved-section" aria-labelledby="savedTitle" hidden>
+        <div class="section-heading">
+          <h2 id="savedTitle">Saved this session</h2>
+          <span id="savedCount" class="count"></span>
+        </div>
+        <p class="saved-note">These disappear when this page closes or reloads. Export any route you want to keep.</p>
+        <div id="savedList" class="saved-list"></div>
+      </section>
+
+      <footer class="product-footer">SubRoute v1.0 — made for drivers.</footer>
+    </main>
+
+    <section id="runSheet" class="run-sheet" aria-labelledby="runSheetTitle">
+      <div class="preview-tools">
+        <span>Print-ready preview — use your browser’s Print command when ready.</span>
+        <button id="closePreview" class="button-secondary" type="button">Back to editor</button>
+      </div>
+      <header class="run-header">
+        <h1 id="runSheetTitle">Untitled route</h1>
+        <div id="runDate" class="run-date"></div>
+      </header>
+      <div id="runEndpoints" class="run-endpoints"></div>
+      <ol id="runStops" class="run-stops"></ol>
+      <div class="run-notes">Notes:</div>
+    </section>
+
+    <div id="stickyAction" class="sticky-action" hidden>
+      <span id="stickyCount" class="sticky-count"></span>
+      <a id="stickyMaps" class="button button-primary is-disabled" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Open in Google Maps</a>
+    </div>
+
+    <dialog id="clearDialog" class="confirm-dialog" aria-labelledby="clearTitle">
+      <div class="confirm-inner">
+        <h2 id="clearTitle">Clear this route?</h2>
+        <p>This removes the current stop list and route details. Export it first if you need a copy.</p>
+        <div class="confirm-actions">
+          <button id="cancelClear" class="button-secondary" type="button">Keep route</button>
+          <button id="confirmClear" class="clear-confirm" type="button">Clear route</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var counter = 0;
+        var draggedId = null;
+        var toastTimer = null;
+        var state = {
+          name: "",
+          start: "",
+          end: "",
+          stops: []
+        };
+        var sessionRoutes = [];
+
+        var els = {
+          routeName: document.getElementById("routeName"),
+          routeStart: document.getElementById("routeStart"),
+          routeEnd: document.getElementById("routeEnd"),
+          stopInput: document.getElementById("stopInput"),
+          buildButton: document.getElementById("buildButton"),
+          sampleButton: document.getElementById("sampleButton"),
+          inputMessage: document.getElementById("inputMessage"),
+          stopList: document.getElementById("stopList"),
+          emptyState: document.getElementById("emptyState"),
+          stopCount: document.getElementById("stopCount"),
+          statsStops: document.getElementById("statsStops"),
+          addStopForm: document.getElementById("addStopForm"),
+          addStopInput: document.getElementById("addStopInput"),
+          mapPanel: document.getElementById("mapPanel"),
+          openMaps: document.getElementById("openMaps"),
+          copyButton: document.getElementById("copyButton"),
+          urlStatus: document.getElementById("urlStatus"),
+          urlWarning: document.getElementById("urlWarning"),
+          saveButton: document.getElementById("saveButton"),
+          exportButton: document.getElementById("exportButton"),
+          clearButton: document.getElementById("clearButton"),
+          clearDialog: document.getElementById("clearDialog"),
+          cancelClear: document.getElementById("cancelClear"),
+          confirmClear: document.getElementById("confirmClear"),
+          importInput: document.getElementById("importInput"),
+          previewButton: document.getElementById("previewButton"),
+          savedSection: document.getElementById("savedSection"),
+          savedList: document.getElementById("savedList"),
+          savedCount: document.getElementById("savedCount"),
+          runSheetTitle: document.getElementById("runSheetTitle"),
+          runDate: document.getElementById("runDate"),
+          runEndpoints: document.getElementById("runEndpoints"),
+          runStops: document.getElementById("runStops"),
+          closePreview: document.getElementById("closePreview"),
+          onboarding: document.getElementById("onboarding"),
+          dismissOnboarding: document.getElementById("dismissOnboarding"),
+          stickyAction: document.getElementById("stickyAction"),
+          stickyMaps: document.getElementById("stickyMaps"),
+          stickyCount: document.getElementById("stickyCount"),
+          toast: document.getElementById("toast")
+        };
+
+        function makeId() {
+          counter += 1;
+          return "stop-" + Date.now().toString(36) + "-" + counter;
+        }
+
+        function cleanText(value) {
+          return String(value || "").replace(/\s+/g, " ").trim().slice(0, 300);
+        }
+
+        function makeStop(label) {
+          return { id: makeId(), label: cleanText(label) };
+        }
+
+        function escapeFilename(value) {
+          var cleaned = cleanText(value || "route")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+          return cleaned || "route";
+        }
+
+        function localDateStamp() {
+          var now = new Date();
+          var month = String(now.getMonth() + 1).padStart(2, "0");
+          var day = String(now.getDate()).padStart(2, "0");
+          return now.getFullYear() + "-" + month + "-" + day;
+        }
+
+        function parseCsvRow(line) {
+          var cells = [];
+          var cell = "";
+          var quoted = false;
+          for (var i = 0; i < line.length; i += 1) {
+            var char = line[i];
+            if (char === '"') {
+              if (quoted && line[i + 1] === '"') {
+                cell += '"';
+                i += 1;
+              } else {
+                quoted = !quoted;
+              }
+            } else if (char === "," && !quoted) {
+              cells.push(cell.trim());
+              cell = "";
+            } else {
+              cell += char;
+            }
+          }
+          cells.push(cell.trim());
+          return cells;
+        }
+
+        function parseStops(raw) {
+          var lines = String(raw || "")
+            .split(/\r?\n/)
+            .map(function (line) { return line.trim(); })
+            .filter(Boolean);
+          if (!lines.length) return [];
+
+          var firstCells = parseCsvRow(lines[0]);
+          var headers = firstCells.map(function (cell) { return cell.toLowerCase().replace(/[^a-z0-9]/g, ""); });
+          var addressWords = ["address", "streetaddress", "stop", "stopaddress", "location", "destination"];
+          var addressIndex = -1;
+          addressWords.some(function (word) {
+            var index = headers.indexOf(word);
+            if (index !== -1) {
+              addressIndex = index;
+              return true;
+            }
+            return false;
+          });
+
+          if (addressIndex !== -1 && lines.length > 1) {
+            var cityIndex = headers.indexOf("city");
+            var stateIndex = headers.indexOf("state");
+            var zipIndex = headers.indexOf("zip");
+            if (zipIndex === -1) zipIndex = headers.indexOf("zipcode");
+            return lines.slice(1).map(function (line) {
+              var cells = parseCsvRow(line);
+              var parts = [cells[addressIndex]];
+              if (cityIndex !== -1) parts.push(cells[cityIndex]);
+              if (stateIndex !== -1) parts.push(cells[stateIndex]);
+              if (zipIndex !== -1) parts.push(cells[zipIndex]);
+              return cleanText(parts.filter(Boolean).join(", "));
+            }).filter(Boolean);
+          }
+
+          return lines.map(function (line) {
+            return cleanText(line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, ""));
+          }).filter(Boolean);
+        }
+
+        function routePoints() {
+          var points = [];
+          if (state.start) points.push(state.start);
+          state.stops.forEach(function (stop) { points.push(stop.label); });
+          if (state.end) points.push(state.end);
+          return points;
+        }
+
+        function mapsUrl() {
+          var points = routePoints();
+          if (points.length < 2) return "";
+          return "https://www.google.com/maps/dir/" + points.map(function (point) {
+            return encodeURIComponent(point);
+          }).join("/");
+        }
+
+        function syncFields() {
+          state.name = cleanText(els.routeName.value).slice(0, 90);
+          state.start = cleanText(els.routeStart.value);
+          state.end = cleanText(els.routeEnd.value);
+        }
+
+        function setFields() {
+          els.routeName.value = state.name;
+          els.routeStart.value = state.start;
+          els.routeEnd.value = state.end;
+        }
+
+        function showToast(message) {
+          window.clearTimeout(toastTimer);
+          els.toast.textContent = message;
+          els.toast.classList.add("show");
+          toastTimer = window.setTimeout(function () {
+            els.toast.classList.remove("show");
+          }, 2200);
+        }
+
+        function renderRunSheet() {
+          els.runSheetTitle.textContent = state.name || "Untitled route";
+          els.runDate.textContent = new Intl.DateTimeFormat(undefined, {
+            year: "numeric", month: "long", day: "numeric"
+          }).format(new Date());
+          els.runEndpoints.replaceChildren();
+
+          var start = document.createElement("div");
+          start.className = "run-point";
+          var startLabel = document.createElement("span");
+          startLabel.className = "run-label";
+          startLabel.textContent = "Start";
+          var startText = document.createElement("span");
+          startText.textContent = state.start || "Not specified";
+          start.append(startLabel, startText);
+
+          var end = document.createElement("div");
+          end.className = "run-point";
+          var endLabel = document.createElement("span");
+          endLabel.className = "run-label";
+          endLabel.textContent = "End";
+          var endText = document.createElement("span");
+          endText.textContent = state.end || "Not specified";
+          end.append(endLabel, endText);
+          els.runEndpoints.append(start, end);
+
+          els.runStops.replaceChildren();
+          state.stops.forEach(function (stop) {
+            var item = document.createElement("li");
+            var check = document.createElement("span");
+            check.className = "check-box";
+            check.setAttribute("aria-hidden", "true");
+            var text = document.createElement("span");
+            text.textContent = stop.label;
+            item.append(check, text);
+            els.runStops.appendChild(item);
+          });
+        }
+
+        function renderSavedRoutes() {
+          els.savedSection.hidden = sessionRoutes.length === 0;
+          els.savedCount.textContent = sessionRoutes.length + (sessionRoutes.length === 1 ? " route" : " routes");
+          els.savedList.replaceChildren();
+
+          sessionRoutes.forEach(function (route) {
+            var row = document.createElement("div");
+            row.className = "saved-route";
+
+            var info = document.createElement("div");
+            var name = document.createElement("div");
+            name.className = "saved-name";
+            name.textContent = route.name || "Untitled route";
+            var meta = document.createElement("div");
+            meta.className = "saved-meta";
+            meta.textContent = route.stops.length + (route.stops.length === 1 ? " stop" : " stops");
+            info.append(name, meta);
+
+            var controls = document.createElement("div");
+            controls.className = "saved-controls";
+            var load = document.createElement("button");
+            load.className = "button-secondary";
+            load.type = "button";
+            load.textContent = "Load";
+            load.addEventListener("click", function () { loadRoute(route); });
+            var exportRoute = document.createElement("button");
+            exportRoute.className = "button-quiet";
+            exportRoute.type = "button";
+            exportRoute.textContent = "Export";
+            exportRoute.addEventListener("click", function () { downloadRoute(route); });
+            var remove = document.createElement("button");
+            remove.className = "button-quiet button-danger";
+            remove.type = "button";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+              sessionRoutes = sessionRoutes.filter(function (item) { return item.sessionId !== route.sessionId; });
+              renderSavedRoutes();
+              showToast("Removed from this session");
+            });
+            controls.append(load, exportRoute, remove);
+            row.append(info, controls);
+            els.savedList.appendChild(row);
+          });
+        }
+
+        function render() {
+          syncFields();
+          var hasStops = state.stops.length > 0;
+          var stopLabel = state.stops.length + (state.stops.length === 1 ? " stop" : " stops");
+          els.stopCount.textContent = stopLabel;
+          els.statsStops.textContent = stopLabel;
+          els.stickyCount.textContent = stopLabel;
+          els.emptyState.hidden = hasStops;
+          els.addStopForm.hidden = !hasStops;
+          els.mapPanel.hidden = !hasStops;
+          els.stickyAction.hidden = !hasStops;
+          els.saveButton.disabled = !hasStops;
+          els.exportButton.disabled = !hasStops;
+          els.previewButton.disabled = !hasStops;
+          els.clearButton.disabled = !hasStops;
+          els.stopList.replaceChildren();
+
+          state.stops.forEach(function (stop, index) {
+            var row = document.createElement("li");
+            row.className = "stop-row";
+            row.draggable = true;
+            row.dataset.id = stop.id;
+
+            var handle = document.createElement("button");
+            handle.type = "button";
+            handle.className = "drag-handle";
+            handle.title = "Drag to reorder";
+            handle.setAttribute("aria-label", "Drag stop " + (index + 1) + " to reorder");
+
+            var copy = document.createElement("div");
+            copy.className = "stop-copy";
+            var number = document.createElement("span");
+            number.className = "stop-number";
+            number.textContent = "Stop " + (index + 1);
+            var address = document.createElement("div");
+            address.className = "stop-address";
+            address.textContent = stop.label;
+            copy.append(number, address);
+
+            var controls = document.createElement("div");
+            controls.className = "stop-controls";
+            var up = document.createElement("button");
+            up.type = "button";
+            up.textContent = "Up";
+            up.disabled = index === 0;
+            up.addEventListener("click", function () { moveStop(index, index - 1); });
+            var down = document.createElement("button");
+            down.type = "button";
+            down.textContent = "Down";
+            down.disabled = index === state.stops.length - 1;
+            down.addEventListener("click", function () { moveStop(index, index + 1); });
+            var remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "remove";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+              state.stops.splice(index, 1);
+              render();
+            });
+            controls.append(up, down, remove);
+            row.append(handle, copy, controls);
+
+            row.addEventListener("dragstart", function (event) {
+              draggedId = stop.id;
+              row.classList.add("dragging");
+              if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", stop.id);
+              }
+            });
+            row.addEventListener("dragend", function () {
+              draggedId = null;
+              document.querySelectorAll(".stop-row").forEach(function (item) {
+                item.classList.remove("dragging", "drag-over");
+              });
+            });
+            row.addEventListener("dragover", function (event) {
+              event.preventDefault();
+              if (draggedId && draggedId !== stop.id) row.classList.add("drag-over");
+            });
+            row.addEventListener("dragleave", function () { row.classList.remove("drag-over"); });
+            row.addEventListener("drop", function (event) {
+              event.preventDefault();
+              row.classList.remove("drag-over");
+              var from = state.stops.findIndex(function (item) { return item.id === draggedId; });
+              var to = state.stops.findIndex(function (item) { return item.id === stop.id; });
+              if (from !== -1 && to !== -1 && from !== to) moveStop(from, to);
+            });
+
+            els.stopList.appendChild(row);
+          });
+
+          var url = mapsUrl();
+          if (url) {
+            els.openMaps.href = url;
+            els.stickyMaps.href = url;
+            els.openMaps.classList.remove("is-disabled");
+            els.stickyMaps.classList.remove("is-disabled");
+            els.openMaps.setAttribute("aria-disabled", "false");
+            els.stickyMaps.setAttribute("aria-disabled", "false");
+            els.copyButton.disabled = false;
+            els.urlStatus.textContent = routePoints().length + " route points · " + url.length + " characters";
+          } else {
+            els.openMaps.href = "#";
+            els.stickyMaps.href = "#";
+            els.openMaps.classList.add("is-disabled");
+            els.stickyMaps.classList.add("is-disabled");
+            els.openMaps.setAttribute("aria-disabled", "true");
+            els.stickyMaps.setAttribute("aria-disabled", "true");
+            els.copyButton.disabled = true;
+            els.urlStatus.textContent = "Add a start or end so Google Maps has at least two route points.";
+          }
+
+          if (url.length > 1800) {
+            els.urlWarning.hidden = false;
+            els.urlWarning.textContent = "Long route: some apps may drop stops. Split a very long run into shorter sections, such as AM part 1 and part 2.";
+          } else {
+            els.urlWarning.hidden = true;
+            els.urlWarning.textContent = "";
+          }
+          renderRunSheet();
+        }
+
+        function moveStop(from, to) {
+          if (to < 0 || to >= state.stops.length || from === to) return;
+          var moved = state.stops.splice(from, 1)[0];
+          state.stops.splice(to, 0, moved);
+          render();
+        }
+
+        function routeSnapshot() {
+          syncFields();
+          return {
+            name: state.name,
+            start: state.start,
+            end: state.end,
+            stops: state.stops.map(function (stop) { return stop.label; })
+          };
+        }
+
+        function downloadRoute(route) {
+          var output = {
+            app: "SubRoute — Bus Route Builder",
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            route: {
+              name: cleanText(route.name).slice(0, 90),
+              start: cleanText(route.start),
+              end: cleanText(route.end),
+              stops: (route.stops || []).map(function (stop) {
+                return cleanText(typeof stop === "string" ? stop : stop.label);
+              }).filter(Boolean)
+            }
+          };
+          var blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" });
+          var url = URL.createObjectURL(blob);
+          var anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = escapeFilename(output.route.name) + "-" + localDateStamp() + ".json";
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+          showToast("Route exported");
+        }
+
+        function normalizeImported(data) {
+          var route = data && data.route ? data.route : data;
+          if (!route || !Array.isArray(route.stops)) throw new Error("This file does not contain a route with stops.");
+          var stops = route.stops.map(function (stop) {
+            return cleanText(typeof stop === "string" ? stop : stop && stop.label);
+          }).filter(Boolean);
+          if (!stops.length) throw new Error("This route file has no usable stops.");
+          if (stops.length > 300) throw new Error("This route has more than 300 stops and cannot be imported.");
+          return {
+            name: cleanText(route.name).slice(0, 90),
+            start: cleanText(route.start),
+            end: cleanText(route.end),
+            stops: stops
+          };
+        }
+
+        function loadRoute(route) {
+          state.name = cleanText(route.name).slice(0, 90);
+          state.start = cleanText(route.start);
+          state.end = cleanText(route.end);
+          state.stops = (route.stops || []).map(function (stop) {
+            return makeStop(typeof stop === "string" ? stop : stop.label);
+          }).filter(function (stop) { return stop.label; });
+          setFields();
+          els.stopInput.value = state.stops.map(function (stop) { return stop.label; }).join("\n");
+          els.inputMessage.textContent = "";
+          render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          showToast("Route loaded");
+        }
+
+        els.buildButton.addEventListener("click", function () {
+          var parsed = parseStops(els.stopInput.value);
+          if (!parsed.length) {
+            els.inputMessage.textContent = "Paste at least one stop before building the route.";
+            els.stopInput.focus();
+            return;
+          }
+          els.inputMessage.textContent = "";
+          syncFields();
+          state.stops = parsed.map(makeStop);
+          render();
+          showToast("Route built with " + parsed.length + (parsed.length === 1 ? " stop" : " stops"));
+        });
+
+        els.sampleButton.addEventListener("click", function () {
+          els.routeName.value = "Seneca sample run";
+          els.routeStart.value = "";
+          els.routeEnd.value = "";
+          els.stopInput.value = [
+            "Seneca High School, Seneca, SC",
+            "Seneca Middle School, Seneca, SC",
+            "Premiere Cinema 8, 675 Bypass Hwy 123, Seneca, SC",
+            "Oconee Memorial Hospital, Seneca, SC"
+          ].join("\n");
+          els.inputMessage.textContent = "Sample loaded. Select Build route to try it.";
+          els.stopInput.focus();
+        });
+
+        [els.routeName, els.routeStart, els.routeEnd].forEach(function (input) {
+          input.addEventListener("input", function () { render(); });
+        });
+
+        els.addStopForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          var value = cleanText(els.addStopInput.value);
+          if (!value) {
+            els.addStopInput.focus();
+            return;
+          }
+          state.stops.push(makeStop(value));
+          els.addStopInput.value = "";
+          render();
+          els.addStopInput.focus();
+          showToast("Stop added");
+        });
+
+        els.copyButton.addEventListener("click", function () {
+          var url = mapsUrl();
+          if (!url) return;
+          function copied() { showToast("Google Maps link copied"); }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(copied).catch(function () { fallbackCopy(url, copied); });
+          } else {
+            fallbackCopy(url, copied);
+          }
+        });
+
+        function fallbackCopy(text, onSuccess) {
+          var textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+            onSuccess();
+          } catch (error) {
+            showToast("Could not copy. Export the route instead.");
+          }
+          textarea.remove();
+        }
+
+        els.saveButton.addEventListener("click", function () {
+          var snapshot = routeSnapshot();
+          snapshot.sessionId = "route-" + Date.now().toString(36) + "-" + counter;
+          sessionRoutes.unshift(snapshot);
+          renderSavedRoutes();
+          showToast("Saved for this session");
+        });
+
+        els.exportButton.addEventListener("click", function () { downloadRoute(routeSnapshot()); });
+
+        els.importInput.addEventListener("change", function () {
+          var file = els.importInput.files && els.importInput.files[0];
+          if (!file) return;
+          if (file.size > 1024 * 1024) {
+            els.inputMessage.textContent = "That file is too large. Choose a route JSON file under 1 MB.";
+            els.importInput.value = "";
+            return;
+          }
+          var reader = new FileReader();
+          reader.addEventListener("load", function () {
+            try {
+              var imported = normalizeImported(JSON.parse(reader.result));
+              loadRoute(imported);
+              showToast("JSON route imported");
+            } catch (error) {
+              els.inputMessage.textContent = error.message || "That JSON file could not be imported.";
+            }
+            els.importInput.value = "";
+          });
+          reader.addEventListener("error", function () {
+            els.inputMessage.textContent = "That file could not be read.";
+            els.importInput.value = "";
+          });
+          reader.readAsText(file);
+        });
+
+        els.clearButton.addEventListener("click", function () {
+          if (typeof els.clearDialog.showModal === "function") {
+            els.clearDialog.showModal();
+          } else {
+            els.clearDialog.setAttribute("open", "");
+          }
+          els.cancelClear.focus();
+        });
+
+        els.cancelClear.addEventListener("click", function () {
+          els.clearDialog.close();
+          els.clearButton.focus();
+        });
+
+        els.confirmClear.addEventListener("click", function () {
+          state = { name: "", start: "", end: "", stops: [] };
+          setFields();
+          els.stopInput.value = "";
+          els.addStopInput.value = "";
+          els.inputMessage.textContent = "";
+          els.clearDialog.close();
+          render();
+          els.stopInput.focus();
+          showToast("Route cleared");
+        });
+
+        els.previewButton.addEventListener("click", function () {
+          renderRunSheet();
+          document.body.classList.add("preview-mode");
+          document.documentElement.scrollTop = 0;
+          els.closePreview.focus();
+        });
+
+        els.closePreview.addEventListener("click", function () {
+          document.body.classList.remove("preview-mode");
+          document.documentElement.scrollTop = 0;
+          els.previewButton.focus();
+        });
+
+        els.dismissOnboarding.addEventListener("click", function () {
+          els.onboarding.close();
+          els.stopInput.focus();
+        });
+
+        render();
+        if (typeof els.onboarding.showModal === "function") {
+          els.onboarding.showModal();
+        } else {
+          els.onboarding.setAttribute("open", "");
+        }
+      }());
+    </script>
+  </body>
+</html>
