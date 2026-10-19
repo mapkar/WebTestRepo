@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is Anyone Going to Tell Us? UFO Lore, the "Races," and the Real Odds of Disclosure (Oct 2026)</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#ffffff; --ink:#1c2230; --muted:#5b6578; --line:#e3e7ef;
+  --accent:#3b4cca; --accent2:#7b3fe4; --night:#0f1630;
+  --fact:#1f8a4c; --fact-bg:#e4f5ec;
+  --test:#b26a00; --test-bg:#fff3dc;
+  --rumor:#c0392b; --rumor-bg:#fde8e6;
+  --chip:#eef0f5;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-word}
+a:hover{color:var(--accent2)}
+.wrap{max-width:920px;margin:0 auto;padding:0 18px}
+header.hero{background:radial-gradient(1200px 400px at 80% -10%,#3a2c7a 0%,transparent 60%),radial-gradient(800px 300px at 0% 0%,#1d3a7a 0%,transparent 60%),var(--night);color:#eef1ff;padding:44px 0 34px;position:relative;overflow:hidden}
+header.hero:before{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 10% 20%,#fff8,transparent),radial-gradient(1px 1px at 30% 70%,#fff6,transparent),radial-gradient(1.5px 1.5px at 55% 30%,#fff9,transparent),radial-gradient(1px 1px at 75% 60%,#fff7,transparent),radial-gradient(1px 1px at 90% 15%,#fff8,transparent),radial-gradient(1px 1px at 65% 85%,#fff5,transparent);pointer-events:none}
+.hero .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:#aab4ff;font-weight:700}
+.hero h1{font-size:clamp(26px,5vw,40px);line-height:1.15;margin:8px 0 10px}
+.hero p{color:#cdd3f5;margin:0;max-width:720px}
+.hero .meta{margin-top:14px;font-size:13px;color:#9aa5d8}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:-22px 0 22px;position:relative;box-shadow:0 6px 20px #0b12301a}
+nav.toc strong{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+nav.toc ol{margin:6px 0 0;padding-left:20px;columns:2;column-gap:28px}
+nav.toc li{margin:2px 0;break-inside:avoid}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;margin:0 0 20px}
+h2{font-size:clamp(21px,3.4vw,26px);margin:0 0 12px;line-height:1.25}
+h2 .num{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:8px;font-size:14px;padding:2px 9px;margin-right:8px;vertical-align:4px}
+h3{font-size:18px;margin:20px 0 8px}
+p{margin:8px 0}
+ul{padding-left:20px;margin:8px 0}
+li{margin:5px 0}
+.muted{color:var(--muted)}
+small,.small{font-size:13px}
+/* badges */
+.b{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 9px;margin-right:6px;vertical-align:2px;white-space:nowrap;border:1px solid transparent}
+.b-fact{color:var(--fact);background:var(--fact-bg);border-color:#bfe6cf}
+.b-test{color:var(--test);background:var(--test-bg);border-color:#f3d79c}
+.b-rumor{color:var(--rumor);background:var(--rumor-bg);border-color:#f5c1bb}
+.chip{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+.chip.warn{color:#8a5a00;background:#fff7e6;border-color:#f1dcae}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:14px;background:#fafbff;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;margin:12px 0}
+.legend div{display:flex;align-items:center;gap:6px}
+/* callouts */
+.bluf{border-left:6px solid var(--accent);background:linear-gradient(90deg,#eef0ff,#fff 70%)}
+.callout{border-radius:12px;padding:12px 16px;margin:14px 0;border:1px solid}
+.callout.key{background:#eef0ff;border-color:#cfd5ff}
+.callout.warn{background:#fff7e6;border-color:#f1dcae}
+.callout.stop{background:#fde8e6;border-color:#f5c1bb}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+.big{font-size:18px;font-weight:700}
+/* tables */
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#f3f5fa;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.n{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.consensus td{background:#eef0ff;font-weight:700}
+tr.grp td{background:#fafbfd;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fcfcfe}
+.card h4{margin:0 0 4px;font-size:17px}
+.card .tag{font-size:12px;color:var(--muted);margin-bottom:6px}
+.card dl{margin:6px 0 0}
+.card dt{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.card dd{margin:2px 0 0}
+.card .skep{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
+.timeline{list-style:none;padding-left:0;border-left:3px solid #d8dcf5;margin-left:6px}
+.timeline li{position:relative;padding-left:16px;margin:10px 0}
+.timeline li:before{content:"";position:absolute;left:-8px;top:8px;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px #c5cbf0}
+.timeline .d{font-weight:800;font-size:13px;color:var(--accent);display:block}
+.signposts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sp{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fcfcfe}
+.sp .when{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent2)}
+.sp .so{font-size:13.5px;color:var(--muted);margin-top:6px}
+.src h3{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:18px}
+.src ul{list-style:none;padding-left:0}
+.src li{padding-left:14px;text-indent:-14px;font-size:14.5px}
+.src li:before{content:"▸ ";color:var(--accent)}
+footer{color:var(--muted);font-size:13px;text-align:center;padding:10px 0 40px}
+@media (max-width:640px){
+  body{font-size:15.5px}
+  section{padding:18px 15px 14px;border-radius:12px}
+  nav.toc ol{columns:1}
+  header.hero{padding:34px 0 30px}
+}
+@media print{
+  header.hero{background:#fff;color:#000}
+  .hero p,.hero .meta{color:#333}
+  section{break-inside:avoid-page;border-color:#ccc}
+  nav.toc{box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Briefing · Current as of Monday, Oct 19, 2026</div>
+    <h1>Is Anyone Going to Tell Us?<br>UFO Lore, the "Races," and the Real Odds of Disclosure</h1>
+    <p>A fun-but-rigorous tour of what governments have actually released, where the alien "races" came from, whether Russia or China could beat the US to the big announcement, and the honest odds.</p>
+    <div class="meta">Built from two inputs: a Researcher's source notes and a skeptical Adversary review that fact-checked them. All of the Adversary's corrections have been applied. Public sources only.</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc" aria-label="Contents">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#bluf">Bottom line up front</a></li>
+    <li><a href="#us">Where US disclosure actually stands</a></li>
+    <li><a href="#races">The "races" lore</a></li>
+    <li><a href="#rucn">Russia and China: disclose first?</a></li>
+    <li><a href="#skeptic">The skeptic's case</a></li>
+    <li><a href="#steelman">The strongest case for "something there"</a></li>
+    <li><a href="#odds">The odds table</a></li>
+    <li><a href="#watch">What to watch next</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ol>
+</nav>
+
+<div class="legend" role="note" aria-label="How to read the tags">
+  <div><span class="b b-fact">Fact</span> Documented in official records or solid reporting</div>
+  <div><span class="b b-test">Testimony</span> A named person's claim, sworn or public, not corroborated</div>
+  <div><span class="b b-rumor">Rumor</span> Lore, hearsay, or claims we couldn't source</div>
+  <div><span class="chip">secondary</span> Only from a UFO-community blog or tracker</div>
+  <div><span class="chip warn">unverified</span> Not confirmed in this research pass</div>
+</div>
+
+<!-- 1 BLUF -->
+<section id="bluf" class="bluf">
+  <h2><span class="num">1</span>Bottom line up front</h2>
+  <p class="big">As of today, no government anywhere has officially confirmed non-human intelligence (NHI) or alien craft. The US is releasing more UFO material than ever, but what it has released is unresolved cases, not proof.</p>
+  <ul>
+    <li><span class="b b-fact">Fact</span>The US has put out six tranches of "unresolved" case files under the new PURSUE program (May 8 – Sep 18, 2026). The Pentagon's UFO office, AARO, resolved 370 more cases in its FY2025 report, and every one turned out to be ordinary.</li>
+    <li><span class="b b-fact">Fact</span>The strongest disclosure mechanism on the table is a JFK-style <strong>UAP Records Review Board</strong>. The House's FY27 defense bill <em>reportedly</em> includes it. The Senate hasn't acted, and in 2023 the final bill dropped the same idea. The final bill is expected around December 2026.</li>
+    <li><span class="b b-rumor">Rumor</span>The famous alien "races" (Greys, Nordics, Reptilians, Tall Whites, Mantids) come from abductee and contactee stories of the 1950s–90s, mixed with pop culture and some documented US government disinformation. None of them has any physical evidence behind it.</li>
+    <li><span class="b b-rumor">Rumor</span>The idea that "Russia or China will disclose first" has no credible source. Their documented programs treat UFOs as an air-defense problem. China's 2022 FAST "alien signal" turned out to be human radio interference. The Micius satellite is a quantum-communication system for human use. Nobody has detected a "quantum alien signal."</li>
+    <li><strong>The honest odds</strong> (our subjective consensus) of official confirmation backed by released evidence: <strong>US about 1% within 1 year, 2–3% within 5 years, about 4% within 10 years</strong>. Add about 1 point to the 5- and 10-year figures if the Review Board becomes law. Russia and China are each under 1%, about 1%, and about 2%.</li>
+  </ul>
+  <div class="callout key"><span class="t">The one idea to keep in your head</span>Releases and hearings are not disclosure. PURSUE, the National Archives UAP collection, and congressional hearings are <em>transparency processes</em>. Disclosure would mean an official confirmation of NHI backed by evidence that outsiders can check.</div>
+</section>
+
+<!-- 2 US -->
+<section id="us">
+  <h2><span class="num">2</span>Where US disclosure actually stands</h2>
+  <p>The US is the only country running a public, ongoing UFO (now "UAP," for unidentified anomalous phenomena) process. The machinery has grown a lot since 2017. Its official conclusion has not changed.</p>
+
+  <h3>PURSUE: the 2026 file releases</h3>
+  <ul>
+    <li><span class="b b-fact">Fact</span>On President Trump's order, the Department of War (DoW), ODNI, DOE, NASA, and the FBI are releasing UAP files on a rolling basis at <a href="https://www.war.gov/UFO/">war.gov/UFO</a>. Release 1 came out <a href="https://www.war.gov/News/Releases/Release/Article/4480582/department-of-war-releases-unidentified-anomalous-phenomena-files-in-historic-t/">May 8, 2026</a> and Release 6 on <a href="https://www.war.gov/News/Releases/Release/Article/4604795/department-of-war-publishes-sixth-release-of-unidentified-anomalous-phenomena-f/">Sep 18, 2026</a>.</li>
+    <li><span class="b b-fact">Fact</span>The site itself calls these "unresolved cases": the government was "unable to make a definitive determination." That means not enough data to explain them, which is different from evidence of aliens.</li>
+    <li><span class="b b-rumor">Reported</span><span class="chip">secondary</span>One UFO-news site reports that AARO withheld in full the written records behind 46 videos a House task force had asked for (FOIA case 26-F-1892, Sep 30, 2026). Critics argue that releasing videos without the paperwork behind them is thin transparency. This hasn't been confirmed in a primary source (<a href="https://deadofnightdispatch.com/dispatches/aaro-foia-congress-uap-records-withheld-26-f-1892/">Dead of Night Dispatch</a>).</li>
+  </ul>
+
+  <h3>AARO, the Pentagon's UAP office</h3>
+  <ul>
+    <li><span class="b b-fact">Fact</span><strong>FY2025 annual report</strong> (posted Jul 20, 2026): 319 new reports, 1,870 total on file, and 370 cases resolved (114 new plus 256 older), all ordinary. 238 were satellites catching the sun ("flaring"). <em>The part headlines skip:</em> 191 of the 319 new reports went into an "active archive" because there wasn't enough data, 9 were referred for more analysis, and a Virginia Navy case (about 100 airborne UAP) is still under active investigation. "All resolved cases were ordinary" is not the same as "nothing is unexplained." (<a href="https://www.aaro.mil/Portals/136/PDFs/FY25%20UAP%20Annual%20Report/AARO_FY2025_Consolidated_Annual_Report_on_UAP.pdf">PDF</a>)</li>
+    <li><span class="b b-fact">Fact</span><strong>Historical Record Report Vol. 1</strong> (Mar 2024): no evidence that any US government investigation confirmed extraterrestrial technology. It found reverse-engineering claims unsubstantiated and traced several of them to real classified programs that witnesses misread (<a href="https://www.aaro.mil/Portals/136/PDFs/AARO_Historical_Record_Report_Vol_1_2024.pdf">report</a>; <a href="https://www.defense.gov/News/Releases/Release/Article/3700894/statement-by-pentagon-press-secretary-maj-gen-pat-ryder-on-the-historical-recor/">DoD statement</a>). <strong>Vol. 2</strong> is still not on <a href="https://www.aaro.mil/Congressional-Press-Products/">AARO's product list</a>.</li>
+    <li><span class="b b-fact">Fact</span><strong>KONA BLUE</strong> was a proposed DHS program to handle "non-human biologics." According to AARO it was never approved or funded, and the proposal itself rested on the same unverified "legacy program" claims (<a href="https://www.aaro.mil/UAP-Records/">AARO UAP Records</a>).</li>
+  </ul>
+
+  <h3>Laws: what passed, what got stripped</h3>
+  <ul class="timeline">
+    <li><span class="d">FY2024 NDAA · Dec 2023</span><span class="b b-fact">Fact</span>The Schumer–Rounds UAP Disclosure Act proposed an independent Review Board plus federal eminent domain over "technologies of unknown origin" and "biological evidence" of NHI. The conference committee <strong>stripped both</strong>. What survived was a UAP Records Collection at the National Archives (P.L. 118-31 §§1841–1843; <a href="https://www.congress.gov/amendment/118th-congress/senate-amendment/797">S.Amdt.797</a>; <a href="https://www.archives.gov/press/press-releases/2025/nr25-07">NARA</a>).</li>
+    <li><span class="d">FY2025 NDAA</span><span class="b b-fact">Fact</span>Schumer–Rounds was reintroduced and not enacted. <span class="chip warn">details not re-verified</span></li>
+    <li><span class="d">FY2026 NDAA · Dec 18, 2025</span><span class="b b-rumor">Reported</span><span class="chip">secondary</span>Includes UAP provisions on NORAD/NORTHCOM intercept briefings going back to 2004, AARO data access, and accounting for classification guides. No Disclosure Act. Sourced only to a tracker (<a href="https://www.disclosurediaries.com/legislation-tracker/">Disclosure Diaries</a>).</li>
+    <li><span class="d">FY2027 NDAA · Jul 22, 2026</span><span class="b b-fact">Fact</span>The House passed H.R. 8800, 216–212 (<a href="https://www.everycrsreport.com/reports/IN12704.html">CRS IN12704</a>). <span class="b b-rumor">Reported</span><span class="chip">secondary: confirm in official text</span>It reportedly includes a UAP Disclosure Act version (a Burlison amendment with a Review Board, eminent domain, $20M, and a 2030 sunset). The CRS report does <em>not</em> mention UAP language, so check the Congress.gov engrossed text before relying on this.</li>
+    <li><span class="d">Senate · Jun–Jul 2026</span><span class="b b-fact">Fact</span>The Schumer/Rounds amendment S.Amdt.6344 (with a Review Board) was filed Jun 24 and never called up (<a href="https://chamberlight.com/amendments/samdt-6344-119">ChamberLight</a>). Cloture on S. 4784 failed 50–46 on Jul 14 (<a href="https://www.everycrsreport.com/reports/IN12704.html">CRS</a>).</li>
+  </ul>
+  <p class="small muted">Plus: <span class="b b-fact">Fact</span>the National Archives UAP collection (Record Group 615) keeps growing through rolling transfers (<a href="https://www.archives.gov/uap">archives.gov/uap</a>).</p>
+
+  <h3>Hearings</h3>
+  <ul>
+    <li><strong>Jul 26, 2023, House Oversight:</strong> David Grusch, David Fravor, Ryan Graves (<a href="https://oversight.house.gov/hearing/unidentified-anomalous-phenomena-implications-on-national-security-public-safety-and-government-transparency/">hearing</a>; <a href="https://www.congress.gov/118/meeting/house/116282/documents/HHRG-118-GO06-Transcript-20230726.pdf">transcript</a>). DoD denied Grusch's claims, and AARO Vol. 1 rejected them (<a href="https://www.defense.gov/News/Releases/Release/Article/3700894/statement-by-pentagon-press-secretary-maj-gen-pat-ryder-on-the-historical-recor/">DoD</a>).</li>
+    <li><strong>Nov 13, 2024, "UAP: Exposing the Truth":</strong> Luis Elizondo, RAdm (ret.) Tim Gallaudet, Michael Gold, Michael Shellenberger.</li>
+    <li><strong>Nov 19, 2024, Senate Armed Services:</strong> open hearing with AARO's Jon Kosloski.</li>
+    <li><strong>Sep 9, 2025, Rep. Luna's Task Force on Declassification:</strong> Nuccetelli, Wiggins, Knapp, Borland, Spielberger of POGO (<a href="https://oversight.house.gov/hearing/restoring-public-trust-through-uap-transparency-and-whistleblower-protection/">hearing</a>; <a href="https://www.govinfo.gov/content/pkg/CHRG-119hhrg61718/html/CHRG-119hhrg61718.htm">transcript</a>).</li>
+    <li><strong>Mar 31, 2026:</strong> the task force asked Secretary Hegseth for 46 named videos by Apr 14 (<a href="https://oversight.house.gov/wp-content/uploads/2026/03/UAP-Request-Letter-FINAL.pdf">letter</a>).</li>
+    <li><span class="b b-rumor">Reported</span><span class="chip">secondary</span>Chairman Comer reportedly moved the next UAP hearing to the November 2026 lame-duck session (<a href="https://www.ufouap.com/news/">ufouap.com</a>).</li>
+  </ul>
+
+  <div class="callout warn"><span class="t">December 2026 defense bill watch</span>Final FY27 NDAA passage is reportedly targeted for the week of Dec 7 <span class="chip">secondary: tracker only</span>. The question that matters: does the final House–Senate compromise keep the Review Board and eminent domain, or strip them like in 2023? Even if they survive, the law creates a <em>records process</em>, not evidence. That's why it moves our odds only about 1 point.</div>
+</section>
+
+<!-- 3 Races -->
+<section id="races">
+  <h2><span class="num">3</span>The "races" lore</h2>
+  <p>If you've spent time on UFO YouTube, you've met the cast. Every type below traces back to a specific book, contactee, or hypnosis session, and you can usually date it. <strong>None is supported by physical or biological evidence.</strong> They're worth knowing as culture and as a case study in how stories spread.</p>
+  <div class="grid">
+    <div class="card">
+      <h4>👽 The Greys</h4>
+      <div class="tag"><span class="b b-test">Testimony</span><span class="b b-rumor">Lore</span> Claimed home: Zeta Reticuli</div>
+      <dl><dt>Origin</dt><dd>Betty & Barney Hill's abduction story, New Hampshire, Sep 1961. Marjorie Fish later matched Betty's "star map" to Zeta Reticuli. Popularized by <em>The Interrupted Journey</em> (1966), Strieber's <em>Communion</em> (1987), Hopkins, Jacobs, and Mack.</dd>
+      <dt>Sources</dt><dd><a href="https://en.wikipedia.org/wiki/Barney_and_Betty_Hill_incident">Hill incident</a> · <a href="https://en.wikipedia.org/wiki/Grey_alien">Grey alien</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> an <em>Outer Limits</em> episode with a similar alien ("The Bellero Shield," 1964) aired 12 days before Barney's hypnosis session. The star-map match is contested and was weakened by newer star data.</div>
+    </div>
+    <div class="card">
+      <h4>✨ The Nordics</h4>
+      <div class="tag"><span class="b b-test">Testimony</span><span class="b b-rumor">Lore</span> Tall, blond, "space brothers"</div>
+      <dl><dt>Origin</dt><dd>1950s contactees, above all George Adamski's "Orthon" from Venus (1952; <em>Flying Saucers Have Landed</em>, 1953). Later Billy Meier's "Pleiadians" in the 1970s.</dd>
+      <dt>Sources</dt><dd><a href="https://en.wikipedia.org/wiki/George_Adamski">Adamski</a> · <a href="https://en.wikipedia.org/wiki/Nordic_aliens">Nordic aliens</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> planetary science rules out Venusian civilizations, and Meier's photos were shown to be models.</div>
+    </div>
+    <div class="card">
+      <h4>🦎 The Reptilians</h4>
+      <div class="tag"><span class="b b-rumor">Lore</span> Shape-shifters "among us"</div>
+      <dl><dt>Origin</dt><dd>Pulp fiction (R.E. Howard's serpent men, 1929), scattered abduction reports (e.g., Herbert Schirmer, 1967), and the full conspiracy version in David Icke's <em>The Biggest Secret</em> (1999).</dd>
+      <dt>Source</dt><dd><a href="https://en.wikipedia.org/wiki/Reptilian_conspiracy_theory">Reptilian conspiracy theory</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> scholars and the ADL point out that Icke's version recycles antisemitic tropes. It's the least "UFO" and most "conspiracy" of the bunch.</div>
+    </div>
+    <div class="card">
+      <h4>🏜️ The Tall Whites</h4>
+      <div class="tag"><span class="b b-test">Testimony</span> Supposedly near Nellis AFB, Nevada</div>
+      <dl><dt>Origin</dt><dd>Charles James Hall's <em>Millennial Hospitality</em> series (from 2002). Hall says he met them while working as a USAF weather observer at Indian Springs in the 1960s.</dd>
+      <dt>Source</dt><dd><a href="https://en.wikipedia.org/wiki/Tall_whites">Wikipedia: Tall whites</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> one source, no corroboration.</div>
+    </div>
+    <div class="card">
+      <h4>🦗 The Mantids / Insectoids</h4>
+      <div class="tag"><span class="b b-test">Testimony</span><span class="b b-rumor">Lore</span> "Supervisors" in abduction accounts</div>
+      <dl><dt>Origin</dt><dd>Abduction literature of the 1980s–90s (Strieber; Mack's <em>Abduction</em>, 1994), much of it from hypnotic regression. Revived by "insectoid" mentions on 2020s whistleblower podcasts.</dd>
+      <dt>Source</dt><dd><a href="https://en.wikipedia.org/wiki/John_E._Mack">John E. Mack</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> hypnotic regression is known to produce false memories (Susan Clancy, <em>Abducted</em>, Harvard UP, 2005).</div>
+    </div>
+    <div class="card">
+      <h4>🌀 Hybrids & "Interdimensionals"</h4>
+      <div class="tag"><span class="b b-rumor">Lore</span> Hypothesis, not data</div>
+      <dl><dt>Origin</dt><dd>David Jacobs' "hybrid program" (1990s). Jacques Vallée and John Keel's "interdimensional" idea (1969–75).</dd>
+      <dt>Source</dt><dd><a href="https://en.wikipedia.org/wiki/Jacques_Vall%C3%A9e">Jacques Vallée</a></dd></dl>
+      <div class="skep"><strong>Skeptic's take:</strong> it's a lens for reading the stories, not an observation.</div>
+    </div>
+  </div>
+  <div class="callout stop"><span class="t">Plot twist: some of the myth was government-made</span>
+    <ul>
+      <li><span class="b b-fact">Fact</span>In the 1980s, Air Force agent Richard Doty fed researcher Paul Bennewitz fabricated material, including "Aquarius" and MJ-12-style documents (<a href="https://overclassified.org/case-files/the-paul-bennewitz-disinformation-operation.html">case summary</a> <span class="chip">secondary</span>).</li>
+      <li><span class="b b-fact">Fact</span>AARO Vol. 1 found a "leaked" 1961 intelligence estimate (SNIE) to be inauthentic (<a href="https://www.aaro.mil/Portals/136/PDFs/AARO_Historical_Record_Report_Vol_1_2024.pdf">AARO Vol. 1</a>).</li>
+      <li><span class="b b-fact">Fact</span>The <em>Wall Street Journal</em> (Jun 2025) reported doctored saucer photos near Area 51 and "Yankee Blue" hazing briefings that told some officers alien programs were real (<a href="https://www.wsj.com/politics/national-security/ufo-us-disinformation-45376f7e">WSJ</a>; <a href="https://archive.md/lORwJ">archive</a>). <span class="chip warn">caveat</span> In a FOIA response, DoD said it found no record of the 2023 "stop" memo the WSJ described (<a href="https://www.theblackvault.com/documentarchive/pentagon-denies-existence-of-yankee-blue-memo-reported-by-wall-street-journal/">Black Vault</a>). Treat that detail as disputed.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 4 Russia/China -->
+<section id="rucn">
+  <h2><span class="num">4</span>Russia and China: will they disclose first?</h2>
+  <p>The rumor goes like this: Moscow and Beijing have been quietly studying UFOs, maybe even hunting for "quantum" alien signals, and they'll scoop Washington. Here's what's documented and what isn't.</p>
+
+  <h3>Documented: the Soviet Union and Russia</h3>
+  <ul>
+    <li><span class="b b-fact">Fact</span><strong>SETKA</strong> (about 1978–1990) ran two tracks, one under the Defense Ministry and one under the Academy of Sciences, to study "anomalous atmospheric phenomena." Yuri Platov took part, and <strong>his conclusion was that most reports resolved to rocket launches and atmospheric effects</strong> (<a href="http://noufors.com/Documents/Platov.pdf">Platov</a>; <a href="https://uapcodex.org/cases/setka-ussr-1978/">SETKA summary</a> <span class="chip">secondary</span>).</li>
+    <li><span class="b b-fact">Fact</span>The famous 1977 Petrozavodsk "jellyfish" was a Kosmos rocket launch from Plesetsk.</li>
+    <li><span class="b b-test">Testimony</span><strong>"Thread-3"</strong> (1991): the KGB-files story is documented mostly through secondary and archive sources, and no verified primary document has surfaced (<a href="https://cernohajev.omeka.net/items/show/17">archive item</a>; <a href="https://www.8newsnow.com/mystery-wire/once-classified-docs-unveil-secret-russian-ufo-program-to-collect-ufo-evidence/">8NewsNow</a> <span class="chip warn">low quality</span>). <strong>Nothing in the Soviet record points to NHI.</strong></li>
+  </ul>
+
+  <h3>Documented: China</h3>
+  <ul>
+    <li><span class="b b-fact">Fact</span>A 2021 <em>South China Morning Post</em> report described a PLA-affiliated study (2019) on using AI to track "unidentified air conditions" for air defense. The researchers themselves said aliens were <strong>"unlikely"</strong>. The concern is foreign drones and spoofing (<a href="https://www.scmp.com/news/china/science/article/3136078/china-military-uses-ai-track-rapidly-increasing-ufos">SCMP</a>; <a href="https://thedebrief.org/china-confirms-it-has-its-own-ufo-task-force/">The Debrief</a> <span class="chip warn">not re-verified</span>).</li>
+    <li><span class="b b-fact">Fact</span>A civilian China UFO Research Organization (CURO) has existed since 1980. <span class="chip warn">current status unverified</span></li>
+  </ul>
+
+  <h3>The FAST "alien signal" of 2022</h3>
+  <p><span class="b b-fact">Fact</span>Researchers using China's giant FAST radio telescope ran a targeted exoplanet scan (including Kepler-438) and reported narrowband candidate signals in the state-run <em>Science and Technology Daily</em>. The article was then deleted. Co-author Dan Werthimer (UC Berkeley) said the signals were "radio interference… from terrestrials" (<a href="https://www.livescience.com/china-did-not-detect-aliens">Live Science</a>; <a href="https://futurism.com/fast-signal-not-aliens-scientist">Futurism</a>; <a href="https://www.popularmechanics.com/space/telescopes/a40302839/chinese-scientists-didnt-actually-find-an-alien-radio-signal/">Popular Mechanics</a>; <a href="https://theconversation.com/did-a-giant-radio-telescope-in-china-just-discover-aliens-not-so-fast-185165">The Conversation</a>). A separate study of FAST's 2019 survey data (<a href="https://arxiv.org/abs/2305.16356">arXiv 2305.16356</a>) improved how interference gets filtered out and listed candidates that still need checking. None has been confirmed. (Background on FAST interference filtering: <a href="https://www.sciopen.com/article/10.16511/j.cnki.qhdxxb.2022.26.030">sciopen</a>.)</p>
+
+  <h3>Micius and "quantum communication signals"</h3>
+  <ul>
+    <li><span class="b b-fact">Fact</span><strong>Micius</strong> (launched 2016) is a real quantum-key-distribution satellite. In 2017 it sent entangled photons to ground stations 1,203 km apart (<a href="https://www.science.org/doi/10.1126/science.aan3211">Science, 2017</a>; <a href="https://www.science.org/content/article/china-s-quantum-satellite-achieves-spooky-action-record-distance">news</a>). It's engineering for <em>human</em> secure communication, not a SETI instrument.</li>
+    <li><span class="b b-fact">Fact</span><strong>Quantum SETI exists as theory.</strong> Physicists Berera and Calderón-Figueroa showed that quantum coherence in photons <em>could</em> survive interstellar distances, with X-rays the best band. They also stress that detecting and interpreting such a signal would take "a fair amount of guesswork" (<a href="https://journals.aps.org/prd/abstract/10.1103/PhysRevD.102.063005">PRD 2020</a>; <a href="https://link.aps.org/doi/10.1103/PhysRevD.105.123033">PRD 2022</a>; <a href="https://arxiv.org/abs/2205.11816">arXiv</a>).</li>
+    <li><span class="b b-rumor">Rumor</span>Claims linking Micius to alien communication have no credible source. <strong>No paper reports a quantum-coherent signal of extraterrestrial origin.</strong> The closest "signal" stories, FAST 2022 and Parkes "BLC1," used ordinary (classical) radio, and both were ruled interference.</li>
+  </ul>
+  <div class="callout key"><span class="t">How the hype gets built</span>"Quantum" + "signal" + "China" mashes together three real things: Micius, a theory paper, and the FAST blip. None of the three supports the combined story.</div>
+
+  <h3>Why "they'll disclose first" is weak</h3>
+  <ul>
+    <li><span class="b b-rumor">Rumor</span>The claim recurs on social media and podcasts. No official signal and no credible source was found.</li>
+    <li><strong>The incentives point the other way.</strong> An authoritarian government gains nothing by admitting it doesn't control its own airspace. A one-sided announcement without shared samples would be dismissed abroad as propaganda. Both governments get more value from framing US UFO talk as cover for American weapons, or as "ghost" spoofing.</li>
+    <li><strong>The Western reading would be suspicion, not awe.</strong> If Moscow or Beijing announced aliens, the rational US and allied response would be to treat it as an information operation or as cover for advanced technology, unless they shared samples for independent lab testing.</li>
+    <li>According to AARO, foreign official efforts have reached the same no-NHI conclusions.</li>
+  </ul>
+</section>
+
+<!-- 5 Skeptic -->
+<section id="skeptic">
+  <h2><span class="num">5</span>The skeptic's case</h2>
+  <p>The strongest skeptical argument isn't "people are dumb." It has three legs: the famous videos have ordinary explanations, key witnesses are secondhand or contested, and part of the mythology was deliberately planted (see the box in section 3).</p>
+
+  <h3>The famous cases and their ordinary explanations</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Case</th><th>Ordinary explanation</th><th>How strong</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GIMBAL</strong> (2015 Navy video)</td><td>Infrared glare from a distant jet. The camera pod's own rotation makes the glare appear to spin while the horizon stays level (<a href="https://www.metabunk.org/threads/explained-the-navy-ufo-videos.11234/">Metabunk</a>; <a href="https://www.youtube.com/watch?v=ka_bX9Hx1H0">Mick West</a>).</td><td>Strong. Disputed by Lehto and others (<a href="https://www.youtube.com/watch?v=fBeqP4z3rXo">reply</a>).</td></tr>
+      <tr><td><strong>GOFAST</strong> (2015)</td><td>Parallax. Using the range and angles shown on screen, the object works out to something slow at about 13,000 ft, plausibly a balloon. It isn't skimming the ocean.</td><td>Strong. The geometry comes from the displayed data.</td></tr>
+      <tr><td><strong>Nimitz "Tic Tac" / FLIR1</strong> (2004)</td><td>The video fits a distant, low-resolution aircraft, and the apparent "acceleration" happens at a zoom change (<a href="https://www.metabunk.org/threads/explained-the-navy-ufo-videos.11234/">Metabunk</a>). The pilots' eyewitness account and the radar claims have no public raw data. AARO has published no resolution.</td><td><strong>Unresolved for lack of data.</strong> Not debunked.</td></tr>
+      <tr><td><strong>Roswell</strong> (1947)</td><td>Debris from Project Mogul, a classified balloon train built to detect Soviet nuclear tests (<a href="https://www.af.mil/The-Roswell-Report/">USAF</a>; <a href="https://www.nsa.gov/portals/75/documents/news-features/declassified-documents/ufo/report_af_roswell.pdf">1994 report</a>).</td><td>Strong documentary basis.</td></tr>
+      <tr><td><strong>Malmstrom</strong> (1967 missile shutdown)</td><td>Boeing reproduced the shutdown with an electrical pulse. The UFO link rests mostly on recollections decades later (<a href="https://skeptoid.com/episodes/842">Skeptoid</a>; <a href="https://rr0.org/time/1/9/7/8/08/23/Malmstrom/index.html">documents</a>).</td><td>Moderate. The exact trigger was never found.</td></tr>
+      <tr><td><strong>Phoenix Lights</strong> (1997)</td><td>The widely filmed second event was flares dropped by Maryland Air National Guard A-10s (<a href="https://www.nytimes.com/1997/07/27/us/flares-caused-old-sky-lights-air-guard-says.html">NYT</a>). The earlier "V" was likely a formation of planes. <span class="chip warn">unverified</span></td><td>Strong for the flares.</td></tr>
+      <tr><td><strong>2023 shootdowns</strong></td><td>The Chinese balloon was real and human-made. The three later objects were never recovered, and one plausibly matches the missing K9YO hobby balloon (<a href="https://www.npr.org/2023/02/18/1158048921/pico-balloon-k9yo">NPR</a>; <a href="https://nibbb.org/2023/02/17/a-statement-from-the-nibbb-on-current-events/">NIBBB</a>; <a href="https://www.npr.org/2023/02/18/1158148965/us-canada-end-search-unidentified-airborne-objects-debris">NPR</a>).</td><td>Strong that they were earthly. Exact identity unknown.</td></tr>
+      <tr><td><strong>NJ drones</strong> (2024)</td><td>Lawful drones, manned aircraft, and stars, per DHS, FBI, FAA, and DoD (<a href="https://www.faa.gov/newsroom/dhs-fbi-faa-dod-joint-statement-ongoing-response-reported-drone-sightings">joint statement</a>; <a href="https://www.reuters.com/world/us/no-evidence-new-jersey-drone-sightings-pose-security-threat-white-house-says-2024-12-12/">Reuters</a>).</td><td>Strong.</td></tr>
+      <tr><td><strong>Pilot "orbs"</strong></td><td>AARO traced many to sunlight glinting off Starlink satellites. The rest are mostly balloons, birds, and drones.</td><td>Strong.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">AARO's pattern: the more data a case has, the more likely it gets resolved, and resolved cases come out ordinary.</p>
+
+  <h3>The whistleblower ledger</h3>
+  <ul>
+    <li><span class="b b-test">Testimony · secondhand</span><strong>David Grusch.</strong> Under oath he said his claims about an NHI-craft program came from other people, and that he could name witnesses and locations only in a classified setting (<a href="https://www.congress.gov/118/meeting/house/116282/documents/HHRG-118-GO06-Transcript-20230726.pdf">transcript</a>; <a href="https://oversight.house.gov/wp-content/uploads/2023/07/Dave_G_HOC_Speech_FINAL_For_Trans.pdf">opening statement</a>). In 2022 the Intelligence Community Inspector General called his complaint "credible and urgent." <strong>That phrase is a legal threshold for forwarding a complaint to Congress, not a finding that the claims are true.</strong> <span class="chip warn">no primary link in our sources</span> AARO Vol. 1 found the specific claims it received inaccurate. Corroborated: his employment history and that he filed the complaint. <em>Fair caveat:</em> AARO can't disprove claims it was never given, and his supporters question AARO's independence.</li>
+    <li><span class="b b-test">Testimony · role disputed</span><strong>Luis Elizondo.</strong> DoD spokesperson Susan Gough said he had "no assigned responsibilities" for AATIP and that the DIA ran it (<a href="https://www.theblackvault.com/documentarchive/pentagon-reinforces-mr-luis-elizondo-had-no-responsibilities-on-aatip-senator-harry-reids-2009-memo-changes-nothing/">Black Vault</a>). Elizondo disputes this, and his FOIA-released emails asking for a correction exist (<a href="https://www.esd.whs.mil/Portals/54/Documents/FOID/Reading%20Room/Public_Affairs/21-F-0938-PA-Elizondo-Emails.pdf">DoD FOIA emails</a>). Both sides have documents, so his role is disputed, not settled. His claims about retrieved craft are uncorroborated.</li>
+    <li><span class="b b-fact">Fact (event)</span><strong>David Fravor / Tic Tac.</strong> The Navy authenticated the videos in 2020 (<a href="https://www.aaro.mil/UAP-Cases/Official-UAP-Imagery/">AARO imagery</a>). What the object was remains unresolved (see table).</li>
+    <li><span class="b b-test">Testimony</span><strong>Ryan Graves.</strong> Reporting confirms the 2014–15 East Coast sightings happened. It doesn't establish what they were, and the related GIMBAL/GOFAST videos have strong ordinary explanations.</li>
+    <li><span class="b b-test">Testimony</span><strong>Tim Gallaudet:</strong> recalls a "Go Fast" email, and no document has been released. <strong>Karl Nell:</strong> publicly backs Grusch, with no documents. <strong>Rep. Burlison and others say they were briefed.</strong> That means they heard claims, not that they saw evidence.</li>
+    <li><span class="b b-rumor">Rumor · unverified</span><strong>Jay Stratton</strong> (Oct 2026). Secondary reports say the former UAP Task Force director claimed on Fox to have seen NHI craft and beings (<a href="https://www.ufouap.com/news/">ufouap.com</a> <span class="chip">secondary</span>). We couldn't find the primary interview. AARO's former and current directors (Kirkpatrick, Phillips) say no legacy program exists. This becomes Testimony only if the video or transcript turns up.</li>
+    <li><span class="b b-test">Testimony · discredited</span><strong>Bob Lazar:</strong> no MIT or Caltech records support his claimed degrees (<a href="https://www.gbppr.net/lazar/lazar-mit.html">MIT check</a>; <a href="https://dreamlandresort.com/area51/lazar/fl-edu.htm">"Lazar Flaws"</a>). <strong>Philip Corso</strong> (<em>The Day After Roswell</em>) and <strong>Steven Greer</strong> are criticized for factual errors and uncorroborated claims (<a href="https://skepticalinquirer.org/2017/11/becoming-fantastic/">Skeptical Inquirer</a>).</li>
+  </ul>
+</section>
+
+<!-- 6 Steelman -->
+<section id="steelman">
+  <h2><span class="num">6</span>The strongest case for "something there"</h2>
+  <p>Fairness check. Here's the best honest version of the believer's case.</p>
+  <ul>
+    <li><strong>There's a real unexplained remainder.</strong> AARO and ODNI still list cases they couldn't resolve (191 went into AARO's archive this year alone), and the Virginia maritime case is open. AARO says that's a data problem, but "not enough data" cuts both ways (<a href="https://www.dni.gov/files/ODNI/documents/assessments/Prelimary-Assessment-UAP-20210625.pdf">ODNI 2021</a> <span class="chip warn">URL unverified</span>).</li>
+    <li><strong>Nimitz is genuinely unresolved.</strong> Multiple trained aviators gave consistent accounts, and the raw radar data has never been released.</li>
+    <li><strong>Credentialed people testified under oath, and Congress responded.</strong> A bipartisan Senate leadership pair wrote eminent-domain language for "technologies of unknown origin." Supporters argue the stripping of that language in 2023 is itself suspicious (<a href="https://www.democrats.senate.gov/newsroom/press-releases/majority-leader-schumer-and-republican-senator-mike-rounds-floor-colloquy-on-unidentified-anomalous-phenomena-provisions-in-the-ndaa-and-future-legislation-on-uaps">Schumer–Rounds colloquy</a>; <a href="https://www.insidegovernmentcontracts.com/2024/01/implications-of-the-unidentified-anomalous-phenomena-uap-amendment-in-the-2024-national-defense-authorization-act-ndaa/">Covington analysis</a>). <em>Counter:</em> it reflects ordinary turf and classification politics, and it produced no evidence.</li>
+    <li><strong>The government has lied about this topic before.</strong> Documented myth-seeding means official denials deserve skepticism too, including AARO's.</li>
+    <li><strong>NASA and AARO both want better sensors and less stigma</strong> (<a href="https://science.nasa.gov/wp-content/uploads/2023/09/uap-independent-study-team-final-report.pdf">NASA study</a>), which is an admission that the data is poor.</li>
+  </ul>
+  <div class="callout key"><span class="t">Honest bottom line from both sides</span>The record says "no evidence found," not "proven impossible."</div>
+</section>
+
+<!-- 7 Odds -->
+<section id="odds">
+  <h2><span class="num">7</span>The odds table</h2>
+  <div class="callout warn"><span class="t">These are subjective judgments, not models</span>They are informed guesses: priors adjusted by the evidence above. <strong>Definition:</strong> an official government confirmation of NHI or craft, <em>backed by released evidence</em>. More hearings, more file drops, or an official making suggestive comments are far more likely, and none of them count.</div>
+  <div class="tbl"><table>
+    <thead><tr><th>Actor / estimate</th><th class="n">Within 1 yr<br><span class="small">(Oct 2027)</span></th><th class="n">Within 5 yrs<br><span class="small">(Oct 2031)</span></th><th class="n">Within 10 yrs<br><span class="small">(Oct 2036)</span></th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="4">United States</td></tr>
+      <tr><td>Researcher (original)</td><td class="n">~2%</td><td class="n">~5%</td><td class="n">~8%</td></tr>
+      <tr><td>Adversary (revision)</td><td class="n">~1%</td><td class="n">~2–3%</td><td class="n">~4%</td></tr>
+      <tr class="consensus"><td>Consensus</td><td class="n">~1%</td><td class="n">~2–3%</td><td class="n">~4%</td></tr>
+      <tr><td class="small muted" colspan="4">+ about 1 point at 5 and 10 years <em>only if</em> the Review Board is enacted (i.e., roughly 3–4% and 5%).</td></tr>
+      <tr class="grp"><td colspan="4">Russia</td></tr>
+      <tr><td>Researcher</td><td class="n">&lt;1%</td><td class="n">~1%</td><td class="n">~2%</td></tr>
+      <tr><td>Adversary</td><td class="n" colspan="3">Accepted as stated</td></tr>
+      <tr class="consensus"><td>Consensus</td><td class="n">&lt;1%</td><td class="n">~1%</td><td class="n">~2%</td></tr>
+      <tr class="grp"><td colspan="4">China</td></tr>
+      <tr><td>Researcher</td><td class="n">&lt;1%</td><td class="n">~1%</td><td class="n">~2%</td></tr>
+      <tr><td>Adversary</td><td class="n" colspan="3">Accepted as stated</td></tr>
+      <tr class="consensus"><td>Consensus</td><td class="n">&lt;1%</td><td class="n">~1%</td><td class="n">~2%</td></tr>
+      <tr class="grp"><td colspan="4">Any other government</td></tr>
+      <tr><td>Researcher</td><td class="n">~1%</td><td class="n">~2%</td><td class="n">~4%</td></tr>
+      <tr><td>Adversary</td><td class="n">~1%</td><td class="n">~1–2%</td><td class="n">~2–3%</td></tr>
+      <tr class="consensus"><td>Consensus</td><td class="n">~1%</td><td class="n">~1–2%</td><td class="n">~2–3%</td></tr>
+      <tr class="grp"><td colspan="4">Stricter test: any of US/Russia/China, with evidence accepted by mainstream science</td></tr>
+      <tr><td>Adversary headline</td><td class="n">—</td><td class="n">~1%<br><span class="small">(range 0.5–3%)</span></td><td class="n">—</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Why the numbers look like this</h3>
+  <ul>
+    <li><strong>Base rate:</strong> zero official confirmations in 75+ years, including from investigations with full access.</li>
+    <li><strong>The trend in the data:</strong> every case AARO resolves turns out ordinary, and more data means more resolutions.</li>
+    <li><strong>Why the US numbers were cut:</strong> the original US ~5% at 5 years ran 2.5× above its own base-rate reasoning. Its only upward driver, the Review Board, hasn't been enacted. PURSUE raises the odds of <em>more files</em>, not of <em>confirmation</em>.</li>
+    <li><strong>Russia and China:</strong> their incentives favor treating UAP as adversary drones, and they have no public process at all. A disclosure from them would also face a credibility problem abroad.</li>
+    <li><strong>Other governments</strong> (e.g., France, the UK, Brazil, Japan): none has published anything beyond ordinary findings, and AARO says foreign efforts reached the same conclusions. That's why these sit at or just below the US.</li>
+    <li><strong>The quiet assumption:</strong> if NHI isn't real, these numbers stay low no matter how much gets released.</li>
+  </ul>
+</section>
+
+<!-- 8 Watch -->
+<section id="watch">
+  <h2><span class="num">8</span>What to watch next</h2>
+  <div class="signposts">
+    <div class="sp"><div class="when">November 2026</div><strong>Lame-duck UAP hearing</strong><div class="so">Reportedly moved to November <span class="chip">secondary</span>. Watch for firsthand witnesses or documents, as opposed to more secondhand accounts.</div></div>
+    <div class="sp"><div class="when">~Week of Dec 7, 2026</div><strong>Final FY27 NDAA text</strong><div class="so">Does the Review Board plus eminent domain survive the final compromise? First confirm the House text actually contains it. If enacted: about +1 point.</div></div>
+    <div class="sp"><div class="when">Rolling</div><strong>PURSUE Release 7+</strong><div class="so">Do releases start including the paperwork (sensor data, analyses) and not just videos?</div></div>
+    <div class="sp"><div class="when">Any time</div><strong>AARO Vol. 2</strong><div class="so">Still unpublished. It's the official history from 1945 onward, so check whether it engages with Grusch-type claims in detail.</div></div>
+    <div class="sp"><div class="when">Open case</div><strong>The Virginia maritime case</strong><div class="so">About 100 airborne UAP, under active investigation. Will it resolve, and will the data be released?</div></div>
+    <div class="sp"><div class="when">Rumor check</div><strong>Stratton primary source</strong><div class="so">If the actual Fox interview or a transcript surfaces, it moves from Rumor to Testimony. It still wouldn't be evidence.</div></div>
+    <div class="sp"><div class="when">Russia / China</div><strong>Official statements</strong><div class="so">Any shift from the "drones and air defense" framing, plus any offer to share samples. Without samples, assume information operations.</div></div>
+    <div class="sp"><div class="when">Science</div><strong>Peer-reviewed SETI candidates</strong><div class="so">FAST and Breakthrough Listen candidates confirmed by independent telescopes. A real signal would show up in astronomy papers, not on a podcast.</div></div>
+  </div>
+  <div class="callout key"><span class="t">The real "tell" of true disclosure</span>Physical or biological material handed to independent labs, replicated, and published. Until that happens, everything else is process.</div>
+</section>
+
+<!-- 9 Sources -->
+<section id="sources" class="src">
+  <h2><span class="num">9</span>Sources</h2>
+  <p class="small muted">Every link comes from the Researcher's notes or the Adversary review. Links flagged <span class="chip">secondary</span> are UFO-community aggregators that often cite each other. None is the only source for anything tagged Fact here. Links flagged <span class="chip warn">unverified</span> were not checked this pass.</p>
+
+  <h3>US government: official</h3>
+  <ul>
+    <li><a href="https://www.war.gov/UFO/">war.gov/UFO: PURSUE release hub</a></li>
+    <li><a href="https://www.war.gov/News/Releases/Release/Article/4480582/department-of-war-releases-unidentified-anomalous-phenomena-files-in-historic-t/">DoW: First UAP file release (May 8, 2026)</a></li>
+    <li><a href="https://www.war.gov/News/Releases/Release/Article/4604795/department-of-war-publishes-sixth-release-of-unidentified-anomalous-phenomena-f/">DoW: Sixth UAP file release (Sep 18, 2026)</a></li>
+    <li><a href="https://www.aaro.mil/Portals/136/PDFs/FY25%20UAP%20Annual%20Report/AARO_FY2025_Consolidated_Annual_Report_on_UAP.pdf">AARO FY2025 Consolidated Annual Report (PDF)</a></li>
+    <li><a href="https://www.aaro.mil/Portals/136/PDFs/AARO_Historical_Record_Report_Vol_1_2024.pdf">AARO Historical Record Report Vol. 1 (2024)</a> · <a href="https://www.govinfo.gov/content/pkg/GOVPUB-PREX28-PURL-gpo223327/pdf/GOVPUB-PREX28-PURL-gpo223327.pdf">GovInfo mirror</a></li>
+    <li><a href="https://www.aaro.mil/Congressional-Press-Products/">AARO: Congressional & press products</a></li>
+    <li><a href="https://www.aaro.mil/UAP-Records/">AARO: UAP Records (KONA BLUE)</a></li>
+    <li><a href="https://www.aaro.mil/UAP-Cases/Official-UAP-Imagery/">AARO: Official UAP imagery</a></li>
+    <li><a href="https://www.defense.gov/News/Releases/Release/Article/3700894/statement-by-pentagon-press-secretary-maj-gen-pat-ryder-on-the-historical-recor/">DoD: Ryder statement on Historical Record Report</a></li>
+    <li><a href="https://www.defense.gov/News/Transcripts/Transcript/Article/3702219/media-engagement-with-acting-aaro-director-">DoD: AARO media engagement transcript</a> <span class="chip warn">URL may be truncated</span></li>
+    <li><a href="https://www.dni.gov/files/ODNI/documents/assessments/Prelimary-Assessment-UAP-20210625.pdf">ODNI Preliminary Assessment (2021)</a> <span class="chip warn">unverified URL</span></li>
+    <li><a href="https://science.nasa.gov/wp-content/uploads/2023/09/uap-independent-study-team-final-report.pdf">NASA UAP Independent Study Team report</a> · <a href="https://www.nasa.gov/news-release/update-nasa-shares-uap-independent-study-report-names-director/">NASA release</a></li>
+    <li><a href="https://www.archives.gov/uap">National Archives: UAP Records Collection</a> · <a href="https://www.archives.gov/press/press-releases/2025/nr25-07">NARA press release</a></li>
+    <li><a href="https://www.af.mil/The-Roswell-Report/">USAF: The Roswell Report</a> · <a href="https://www.nsa.gov/portals/75/documents/news-features/declassified-documents/ufo/report_af_roswell.pdf">1994 report (PDF)</a></li>
+    <li><a href="https://www.faa.gov/newsroom/dhs-fbi-faa-dod-joint-statement-ongoing-response-reported-drone-sightings">DHS/FBI/FAA/DoD joint statement on drone sightings</a></li>
+    <li><a href="https://www.esd.whs.mil/Portals/54/Documents/FOID/Reading%20Room/Public_Affairs/21-F-0938-PA-Elizondo-Emails.pdf">DoD FOIA: Elizondo–Gough emails</a></li>
+  </ul>
+
+  <h3>Congress and legislation</h3>
+  <ul>
+    <li><a href="https://oversight.house.gov/hearing/unidentified-anomalous-phenomena-implications-on-national-security-public-safety-and-government-transparency/">House Oversight hearing, Jul 26, 2023</a> · <a href="https://www.congress.gov/118/meeting/house/116282/documents/HHRG-118-GO06-Transcript-20230726.pdf">transcript</a> · <a href="https://oversight.house.gov/wp-content/uploads/2023/07/Dave_G_HOC_Speech_FINAL_For_Trans.pdf">Grusch opening statement</a></li>
+    <li><a href="https://oversight.house.gov/hearing/restoring-public-trust-through-uap-transparency-and-whistleblower-protection/">Task Force hearing, Sep 9, 2025</a> · <a href="https://www.govinfo.gov/content/pkg/CHRG-119hhrg61718/html/CHRG-119hhrg61718.htm">transcript</a></li>
+    <li><a href="https://oversight.house.gov/wp-content/uploads/2026/03/UAP-Request-Letter-FINAL.pdf">Task Force letter requesting 46 videos (Mar 31, 2026)</a></li>
+    <li><a href="https://www.everycrsreport.com/reports/IN12704.html">CRS IN12704: FY27 NDAA status</a></li>
+    <li><a href="https://chamberlight.com/amendments/samdt-6344-119">ChamberLight: S.Amdt.6344 (119th)</a></li>
+    <li><a href="https://www.congress.gov/amendment/118th-congress/senate-amendment/797">Congress.gov: S.Amdt.797 (118th)</a> · <a href="https://www.congress.gov/amendment/118th-congress/senate-amendment/797/text">text</a></li>
+    <li><a href="https://www.democrats.senate.gov/newsroom/press-releases/majority-leader-schumer-and-republican-senator-mike-rounds-floor-colloquy-on-unidentified-anomalous-phenomena-provisions-in-the-ndaa-and-future-legislation-on-uaps">Schumer–Rounds floor colloquy</a></li>
+    <li><a href="https://www.insidegovernmentcontracts.com/2024/01/implications-of-the-unidentified-anomalous-phenomena-uap-amendment-in-the-2024-national-defense-authorization-act-ndaa/">Covington: FY24 NDAA UAP provisions</a></li>
+  </ul>
+
+  <h3>Journalism and skeptical analysis</h3>
+  <ul>
+    <li><a href="https://www.wsj.com/politics/national-security/ufo-us-disinformation-45376f7e">WSJ: "The Pentagon Disinformation That Fueled America's UFO Mythology" (Jun 2025)</a> · <a href="https://archive.md/lORwJ">archive</a></li>
+    <li><a href="https://www.theblackvault.com/documentarchive/pentagon-denies-existence-of-yankee-blue-memo-reported-by-wall-street-journal/">Black Vault: DoD no-records response on "Yankee Blue" memo</a></li>
+    <li><a href="https://www.theblackvault.com/documentarchive/pentagon-reinforces-mr-luis-elizondo-had-no-responsibilities-on-aatip-senator-harry-reids-2009-memo-changes-nothing/">Black Vault: DoD on Elizondo's AATIP role</a></li>
+    <li><a href="https://www.reuters.com/technology/space/pentagon-ufo-report-says-most-sightings-ordinary-objects-phenomena-2024-03-08/">Reuters: AARO Vol. 1 coverage</a> · <a href="https://www.reuters.com/world/us/no-evidence-new-jersey-drone-sightings-pose-security-threat-white-house-says-2024-12-12/">Reuters: NJ drones</a></li>
+    <li><a href="https://www.metabunk.org/threads/explained-the-navy-ufo-videos.11234/">Metabunk: "Explained: The Navy UFO Videos"</a> · <a href="https://www.youtube.com/watch?v=ka_bX9Hx1H0">Mick West: Gimbal glare</a> · <a href="https://www.youtube.com/watch?v=fBeqP4z3rXo">Mick West reply to Lehto</a></li>
+    <li><a href="https://www.npr.org/2023/02/18/1158048921/pico-balloon-k9yo">NPR: K9YO pico balloon</a> · <a href="https://www.npr.org/2023/02/18/1158148965/us-canada-end-search-unidentified-airborne-objects-debris">NPR: searches called off</a> · <a href="https://nibbb.org/2023/02/17/a-statement-from-the-nibbb-on-current-events/">NIBBB statement</a></li>
+    <li><a href="https://www.nytimes.com/1997/07/27/us/flares-caused-old-sky-lights-air-guard-says.html">NYT: Phoenix Lights flares (1997)</a></li>
+    <li><a href="https://skeptoid.com/episodes/842">Skeptoid #842: Malmstrom</a> · <a href="https://rr0.org/time/1/9/7/8/08/23/Malmstrom/index.html">Malmstrom document set</a></li>
+    <li><a href="https://www.gbppr.net/lazar/lazar-mit.html">Lazar MIT investigation</a> · <a href="https://dreamlandresort.com/area51/lazar/fl-edu.htm">"The Lazar Flaws"</a></li>
+    <li><a href="https://skepticalinquirer.org/2017/11/becoming-fantastic/">Skeptical Inquirer: "Becoming Fantastic"</a></li>
+    <li><a href="https://overclassified.org/case-files/the-paul-bennewitz-disinformation-operation.html">Bennewitz/Doty case summary</a> <span class="chip">secondary</span></li>
+  </ul>
+
+  <h3>Russia, China, and the science</h3>
+  <ul>
+    <li><a href="http://noufors.com/Documents/Platov.pdf">Platov: "The Study of UFOs in the Soviet Union"</a></li>
+    <li><a href="https://uapcodex.org/cases/setka-ussr-1978/">SETKA summary</a> <span class="chip">secondary</span> · <a href="https://cernohajev.omeka.net/items/show/17">Thread-3 archive item</a></li>
+    <li><a href="https://www.8newsnow.com/mystery-wire/once-classified-docs-unveil-secret-russian-ufo-program-to-collect-ufo-evidence/">8NewsNow / Mystery Wire: Russian program</a> <span class="chip warn">low quality</span></li>
+    <li><a href="https://www.scmp.com/news/china/science/article/3136078/china-military-uses-ai-track-rapidly-increasing-ufos">SCMP: PLA uses AI to track UFOs (Jun 2021)</a> · <a href="https://thedebrief.org/china-confirms-it-has-its-own-ufo-task-force/">The Debrief</a> <span class="chip warn">not re-verified</span></li>
+    <li><a href="https://www.livescience.com/china-did-not-detect-aliens">Live Science: FAST signal</a> · <a href="https://futurism.com/fast-signal-not-aliens-scientist">Futurism</a> · <a href="https://www.popularmechanics.com/space/telescopes/a40302839/chinese-scientists-didnt-actually-find-an-alien-radio-signal/">Popular Mechanics</a> · <a href="https://theconversation.com/did-a-giant-radio-telescope-in-china-just-discover-aliens-not-so-fast-185165">The Conversation (Tingay)</a></li>
+    <li><a href="https://arxiv.org/abs/2305.16356">arXiv 2305.16356: FAST 2019 survey re-analysis</a> · <a href="https://www.sciopen.com/article/10.16511/j.cnki.qhdxxb.2022.26.030">FAST interference-filtering methods (sciopen)</a></li>
+    <li><a href="https://www.science.org/doi/10.1126/science.aan3211">Yin et al., Science 2017 (Micius)</a> · <a href="https://www.science.org/content/article/china-s-quantum-satellite-achieves-spooky-action-record-distance">Science news on Micius</a></li>
+    <li><a href="https://journals.aps.org/prd/abstract/10.1103/PhysRevD.102.063005">Berera, PRD 102, 063005 (2020)</a> · <a href="https://link.aps.org/doi/10.1103/PhysRevD.105.123033">Berera & Calderón-Figueroa, PRD 105, 123033 (2022)</a> · <a href="https://arxiv.org/abs/2205.11816">arXiv 2205.11816</a></li>
+  </ul>
+
+  <h3>Lore origins (Wikipedia, fine for origin dates)</h3>
+  <ul>
+    <li><a href="https://en.wikipedia.org/wiki/Barney_and_Betty_Hill_incident">Barney and Betty Hill incident</a> · <a href="https://en.wikipedia.org/wiki/Grey_alien">Grey alien</a> · <a href="https://en.wikipedia.org/wiki/George_Adamski">George Adamski</a> · <a href="https://en.wikipedia.org/wiki/Nordic_aliens">Nordic aliens</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Reptilian_conspiracy_theory">Reptilian conspiracy theory</a> · <a href="https://en.wikipedia.org/wiki/Tall_whites">Tall whites</a> · <a href="https://en.wikipedia.org/wiki/John_E._Mack">John E. Mack</a> · <a href="https://en.wikipedia.org/wiki/Jacques_Vall%C3%A9e">Jacques Vallée</a></li>
+  </ul>
+
+  <h3>UFO-community aggregators <span class="chip">secondary</span> <span class="chip warn">unverified</span></h3>
+  <ul>
+    <li><a href="https://deadofnightdispatch.com/dispatches/aaro-foia-congress-uap-records-withheld-26-f-1892/">Dead of Night Dispatch: FOIA 26-F-1892 withholding</a></li>
+    <li><a href="https://www.disclosurediaries.com/legislation-tracker/">Disclosure Diaries: legislation tracker</a></li>
+    <li><a href="https://www.ufouap.com/news/">ufouap.com news (Comer hearing timing; Stratton claim)</a></li>
+    <li><a href="https://insiderrelease.com/aaro-volume-ii-still-missing/">Insider Release: AARO Vol. II still missing</a></li>
+  </ul>
+</section>
+
+<footer>Prepared Oct 19, 2026 from public sources. Probabilities are subjective judgments. Tags show evidence quality, not truth. Stay curious. 🛸</footer>
+</div>
+</body>
+</html>
